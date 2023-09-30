@@ -1,13 +1,21 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import "./App.css";
-import { handleFileRead } from "./utils";
+import { readUploadedFile } from "./utils";
 
 function App() {
-  // const [selectedFile, setSelectedFile] = useState<File | File[]>();
+  const [signalsIntArray, setSignalsIntArray] = useState<Uint8Array>();
+  console.log(signalsIntArray);
 
-  const handleChangeFile = useCallback((e) => {
-    handleFileRead(e);
-  }, []);
+  const handleChangeFile = async (event) => {
+    const file = event.target.files[0];
+
+    try {
+      const fileContents = await readUploadedFile(file);
+      setSignalsIntArray(fileContents as Uint8Array);
+    } catch (e) {
+      console.warn(e.message);
+    }
+  };
 
   return (
     <div className="App">
@@ -15,7 +23,7 @@ function App() {
         <input
           type="file"
           // value={selectedFile}
-          onChange={(e) => handleChangeFile(e.target.files[0])}
+          onChange={handleChangeFile}
         />
       </form>
     </div>
