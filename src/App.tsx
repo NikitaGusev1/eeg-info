@@ -1,17 +1,28 @@
 import { useState } from "react";
 import "./App.css";
-import { readUploadedFile } from "./utils";
+import { EDF, readUploadedFile } from "./utils";
 
 function App() {
-  const [signalsIntArray, setSignalsIntArray] = useState<Uint8Array>();
-  console.log(signalsIntArray);
+  const [edf, setEdf] = useState<EDF>();
+
+  const startSecond = 1;
+  // const lengthSeconds = 5;
+
+  //Reading data from all channels [[], [], []]
+  // const data = edf.read(startSecond, edf.duration);
+  // console.log(data);
 
   const handleChangeFile = async (event) => {
     const file = event.target.files[0];
 
     try {
       const fileContents = await readUploadedFile(file);
-      setSignalsIntArray(fileContents as Uint8Array);
+      console.log(fileContents);
+
+      if (fileContents) {
+        let edfResult = new EDF(fileContents);
+        setEdf(edfResult);
+      }
     } catch (e) {
       console.warn(e.message);
     }
