@@ -1,9 +1,12 @@
 import { useState } from "react";
 import "./App.css";
 import { EDF, readUploadedFile } from "./utils";
+import { Line } from "react-chartjs-2";
+import { labels, options } from "./components/charts/Chart";
 
 function App() {
   const [edf, setEdf] = useState<EDF>();
+  // console.log(edf?.readSingleChannel(0, 1, 5));
 
   const startSecond = 1;
   // const lengthSeconds = 5;
@@ -17,7 +20,7 @@ function App() {
 
     try {
       const fileContents = await readUploadedFile(file);
-      console.log(fileContents);
+      // console.log(fileContents);
 
       if (fileContents) {
         let edfResult = new EDF(fileContents);
@@ -30,13 +33,17 @@ function App() {
 
   return (
     <div className="App">
-      <form>
-        <input
-          type="file"
-          // value={selectedFile}
-          onChange={handleChangeFile}
-        />
-      </form>
+      {edf ? (
+        <Line options={options} data={data} />
+      ) : (
+        <form>
+          <input
+            type="file"
+            // value={selectedFile}
+            onChange={handleChangeFile}
+          />
+        </form>
+      )}
     </div>
   );
 }
