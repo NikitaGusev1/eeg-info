@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@observablehq/plot": "^0.6.11",
     "chart.js": "^4.4.0",
+    "edfdecoder": "^0.1.2",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
-    "styled-components": "^6.0.8"
+    "styled-components": "^6.0.8",
+    "uplot": "^1.6.26",
+    "uplot-react": "^1.1.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
