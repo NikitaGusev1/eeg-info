@@ -14,8 +14,6 @@ function App() {
       const file = event.target.files[0];
 
       const buffer = await getInputFileBuffer(file);
-      console.log(buffer);
-
       const decodedEdf = decodeEdf(buffer);
 
       setEdf(decodedEdf);
