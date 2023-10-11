@@ -26,12 +26,13 @@ ChartJS.register(
 );
 
 // SAMPLE SIZE / DURATION = 1/256 of seconds is my x axis
+// Chartjs works but lags cause canvas. Try observable plot, read about tickformat
 
 function App() {
   const [edf, setEdf] = useState();
   console.log(edf);
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
-  console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 1280));
+  console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 1280)?.length);
 
   const handleChangeFile = useCallback(
     async (event) => {
@@ -68,7 +69,7 @@ function App() {
   };
 
   const xData = [];
-  for (let i = 0; i < 256 * 4; i++) {
+  for (let i = 0; i < 47360; i++) {
     const timeInSeconds = i / 256; // 1/256th second interval
     xData.push(timeInSeconds.toFixed(3)); // Format as seconds with 3 decimal places
   }
