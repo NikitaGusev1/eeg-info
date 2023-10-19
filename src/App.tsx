@@ -1,8 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { Line } from "react-chartjs-2";
 import { decodeEdf, getInputFileBuffer } from "./utils";
-import { data, options } from "./components/charts/Chart";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,6 +12,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import zoomPlugin from "chartjs-plugin-zoom";
+// import Line from "./components/charts/d3/Line";
+
 // import faker from 'faker';
 
 ChartJS.register(
@@ -22,17 +24,16 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  zoomPlugin
 );
-
-// SAMPLE SIZE / DURATION = 1/256 of seconds is my x axis
-// Chartjs works but lags cause canvas. Try observable plot, read about tickformat
 
 function App() {
   const [edf, setEdf] = useState();
-  console.log(edf);
+  // console.log(edf);
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
-  console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 1280)?.length);
+  console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
+  const containerRef = useRef();
 
   const handleChangeFile = useCallback(
     async (event) => {
@@ -47,25 +48,51 @@ function App() {
   );
 
   const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top" as const,
+    // responsive: true,
+    // plugins: {
+    //   legend: {
+    //     position: "top" as const,
+    //   },
+    //   // title: {
+    //   //   display: true,
+    //   //   text: "Chart.js Line Chart",
+    //   // },
+    // },
+    datasets: {
+      line: {
+        pointRadius: 1, // disable for all `'line'` datasets
+        // cubicInterpolationMode: "monotone",
+        lineTension: 0.1,
+        borderJoinStyle: "round",
       },
-      // title: {
-      //   display: true,
-      //   text: "Chart.js Line Chart",
-      // },
-      scales: {
-        x: {
-          ticks: {
-            callback: function (value) {
-              return (1 / 256) * parseFloat(value).toFixed(3) + "s"; // Format the tick label
-            },
+    },
+    events: [],
+    animation: false,
+    scales: {
+      x: {
+        ticks: {
+          callback: function (value) {
+            return 1 / 256; // todo: dynamic ticks based on SAMPLE SIZE / DURATION = 1/256 of seconds is my x axis
           },
+          sampleSize: 2,
         },
       },
     },
+    plugins: {
+      tooltip: {
+        events: [],
+      },
+      zoom: {
+        zoom: {
+          wheel: {
+            enabled: true,
+          },
+          mode: "xy",
+        },
+      },
+    },
+    // spanGaps: true,
+    // showLine: false,
   };
 
   const xData = [];
@@ -83,29 +110,36 @@ function App() {
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
-      // {
-      //   label: "Dataset 2",
-      //   data: [20, 40, 60].reverse(),
-      //   borderColor: "rgb(53, 162, 235)",
-      //   backgroundColor: "rgba(53, 162, 235, 0.5)",
-      // },
+      {
+        label: "Dataset 2",
+        data: edf?.getPhysicalSignalConcatRecords(1, 0, 1280),
+        borderColor: "rgb(53, 162, 235)",
+        backgroundColor: "rgba(53, 162, 235, 0.5)",
+      },
+      {
+        label: "Dataset 3",
+        data: edf?.getPhysicalSignalConcatRecords(2, 0, 1280),
+        borderColor: "rgb(82, 199, 36)",
+        backgroundColor: "rgba(132, 235, 53, 0.5)",
+      },
     ],
   };
 
+  // const signalsArray = edf?.getPhysicalSignalConcatRecords(0, 0, 5);
+
   return (
     <div className="App">
-      {edf ? (
-        <div style={{ width: 5000, height: 4000 }}>
+      <form>
+        <input
+          type="file"
+          // value={selectedFile}
+          onChange={handleChangeFile}
+        />
+      </form>
+      {edf && (
+        <div ref={containerRef} style={{ width: 2000, height: 1600 }}>
           <Line options={options} data={data} />
         </div>
-      ) : (
-        <form>
-          <input
-            type="file"
-            // value={selectedFile}
-            onChange={handleChangeFile}
-          />
-        </form>
       )}
     </div>
   );
