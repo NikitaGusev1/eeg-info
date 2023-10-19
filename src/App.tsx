@@ -96,6 +96,7 @@ function App() {
   };
 
   const xData = [];
+  // todo: use records array length instead 47360
   for (let i = 0; i < 47360; i++) {
     const timeInSeconds = i / 256; // 1/256th second interval
     xData.push(timeInSeconds.toFixed(3)); // Format as seconds with 3 decimal places
@@ -137,7 +138,10 @@ function App() {
         />
       </form>
       {edf && (
-        <div ref={containerRef} style={{ width: 2000, height: 1600 }}>
+        <div
+          ref={containerRef}
+          style={{ width: window.innerWidth, height: window.innerHeight }}
+        >
           <Line options={options} data={data} />
         </div>
       )}
