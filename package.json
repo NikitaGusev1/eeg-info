@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mui/material": "^5.14.14",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.2",
     "@observablehq/plot": "^0.6.11",
     "chart.js": "^4.4.0",
     "chartjs-plugin-zoom": "^2.0.1",
@@ -25,7 +27,7 @@
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
-    "styled-components": "^6.0.8",
+    "styled-components": "^6.1.0",
     "uplot": "^1.6.26",
     "uplot-react": "^1.1.5"
   },

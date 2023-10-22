@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import "./App.css";
 import { Line } from "react-chartjs-2";
 import { decodeEdf, getInputFileBuffer } from "./utils";
@@ -13,9 +13,6 @@ import {
   Legend,
 } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
-// import Line from "./components/charts/d3/Line";
-
-// import faker from 'faker';
 
 ChartJS.register(
   CategoryScale,
@@ -48,20 +45,10 @@ function App() {
   );
 
   const options = {
-    // responsive: true,
-    // plugins: {
-    //   legend: {
-    //     position: "top" as const,
-    //   },
-    //   // title: {
-    //   //   display: true,
-    //   //   text: "Chart.js Line Chart",
-    //   // },
-    // },
     datasets: {
       line: {
-        pointRadius: 1, // disable for all `'line'` datasets
-        // cubicInterpolationMode: "monotone",
+        pointRadius: 0,
+        cubicInterpolationMode: "monotone",
         lineTension: 0.1,
         borderJoinStyle: "round",
       },
@@ -74,7 +61,12 @@ function App() {
           callback: function (value) {
             return 1 / 256; // todo: dynamic ticks based on SAMPLE SIZE / DURATION = 1/256 of seconds is my x axis
           },
-          sampleSize: 2,
+          sampleSize: 1,
+        },
+      },
+      y: {
+        ticks: {
+          sampleSize: 1,
         },
       },
     },
@@ -89,10 +81,14 @@ function App() {
           },
           mode: "xy",
         },
+        pan: {
+          enabled: true,
+          mode: "xy",
+          modifierKey: "shift",
+        },
       },
     },
-    // spanGaps: true,
-    // showLine: false,
+    spanGaps: true,
   };
 
   const xData = [];
