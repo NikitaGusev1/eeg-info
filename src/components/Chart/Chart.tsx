@@ -34,11 +34,12 @@ ChartJS.register(
 export const Chart = ({ edf }: Props) => {
   const containerRef = useRef();
 
-  const options = useMemo(() => {
-    const numberOfSamples = edf?.getSignalNumberOfSamplesPerRecord(0); // those will be the same for every signal
-    const duration = edf?.getRecordDuration();
-    const durationOneSample = numberOfSamples / duration;
+  const numberOfSamples = edf?.getSignalNumberOfSamplesPerRecord(0); // those will be the same for every signal
+  const recordDuration = edf?.getRecordDuration();
+  const durationOneSample = numberOfSamples / recordDuration;
+  const numberOfRecords = edf.getNumberOfRecords();
 
+  const options = useMemo(() => {
     return {
       datasets: {
         line: {
@@ -52,16 +53,11 @@ export const Chart = ({ edf }: Props) => {
       animation: false,
       scales: {
         x: {
+          type: "linear",
           ticks: {
-            callback: function () {
-              return 1 / durationOneSample;
+            callback: function (value: number) {
+              return value + "s"; // Format the tick label with 's'
             },
-            sampleSize: 1,
-          },
-        },
-        y: {
-          ticks: {
-            sampleSize: 1,
           },
         },
       },
@@ -85,13 +81,13 @@ export const Chart = ({ edf }: Props) => {
       },
       spanGaps: true,
     };
-  }, [edf]);
+  }, []);
 
   const xData = [];
   // todo: use records array length instead 47360
   for (let i = 0; i < 47360; i++) {
-    const timeInSeconds = i / 256; // 1/256th second interval
-    xData.push(timeInSeconds.toFixed(3)); // Format as seconds with 3 decimal places
+    const fractions = i / durationOneSample; // 1/Xth second interval
+    xData.push(fractions);
   }
 
   const data = {
@@ -99,16 +95,16 @@ export const Chart = ({ edf }: Props) => {
     datasets: [
       {
         label: "Dataset 1",
-        data: edf?.getPhysicalSignalConcatRecords(0, 0, 1280),
+        data: edf?.getPhysicalSignalConcatRecords(0, 0, numberOfRecords),
       },
-      {
-        label: "Dataset 2",
-        data: edf?.getPhysicalSignalConcatRecords(1, 0, 1280),
-      },
-      {
-        label: "Dataset 3",
-        data: edf?.getPhysicalSignalConcatRecords(2, 0, 1280),
-      },
+      //   {
+      //     label: "Dataset 2",
+      //     data: edf?.getPhysicalSignalConcatRecords(1, 0, 1280),
+      //   },
+      //   {
+      //     label: "Dataset 3",
+      //     data: edf?.getPhysicalSignalConcatRecords(2, 0, 1280),
+      //   },
     ],
   };
 
