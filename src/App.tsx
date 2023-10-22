@@ -5,7 +5,8 @@ import { Chart } from "./components/Chart/Chart";
 function App() {
   const [edf, setEdf] = useState();
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
-  console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
+  // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
+  console.log(edf?.getSignalNumberOfSamplesPerRecord(0));
 
   const handleChangeFile = useCallback(
     async (event) => {

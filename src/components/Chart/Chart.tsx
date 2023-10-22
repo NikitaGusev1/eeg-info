@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import styled from "styled-components";
 import {
@@ -27,59 +27,65 @@ ChartJS.register(
   Tooltip,
   Legend,
   zoomPlugin,
-  // TODO: look into colors
+  // TODO: look into colors, currently they are too similar
   autocolors
 );
 
 export const Chart = ({ edf }: Props) => {
   const containerRef = useRef();
 
-  const options = {
-    datasets: {
-      line: {
-        pointRadius: 0,
-        cubicInterpolationMode: "monotone" as const,
-        lineTension: 0.1,
-        borderJoinStyle: "round" as const,
+  const options = useMemo(() => {
+    const numberOfSamples = edf?.getSignalNumberOfSamplesPerRecord(0); // those will be the same for every signal
+    const duration = edf?.getRecordDuration();
+    const durationOneSample = numberOfSamples / duration;
+
+    return {
+      datasets: {
+        line: {
+          pointRadius: 0,
+          cubicInterpolationMode: "monotone" as const,
+          lineTension: 0.1,
+          borderJoinStyle: "round" as const,
+        },
       },
-    },
-    events: [],
-    animation: false,
-    scales: {
-      x: {
-        ticks: {
-          callback: function (value) {
-            return 1 / 256; // todo: dynamic ticks based on SAMPLE SIZE / DURATION = 1/256 of seconds is my x axis
+      events: [],
+      animation: false,
+      scales: {
+        x: {
+          ticks: {
+            callback: function () {
+              return 1 / durationOneSample;
+            },
+            sampleSize: 1,
           },
-          sampleSize: 1,
+        },
+        y: {
+          ticks: {
+            sampleSize: 1,
+          },
         },
       },
-      y: {
-        ticks: {
-          sampleSize: 1,
+      plugins: {
+        tooltip: {
+          events: [],
         },
-      },
-    },
-    plugins: {
-      tooltip: {
-        events: [],
-      },
-      zoom: {
         zoom: {
-          wheel: {
-            enabled: true,
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            mode: "xy",
           },
-          mode: "xy",
-        },
-        pan: {
-          enabled: true,
-          mode: "xy",
-          modifierKey: "shift",
+          pan: {
+            enabled: true,
+            mode: "xy",
+            modifierKey: "shift",
+          },
         },
       },
-    },
-    spanGaps: true,
-  };
+      spanGaps: true,
+    };
+  }, [edf]);
 
   const xData = [];
   // todo: use records array length instead 47360
