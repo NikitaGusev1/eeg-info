@@ -33,6 +33,7 @@ ChartJS.register(
 );
 
 export const Chart = ({ edf }: Props) => {
+  // TODO: labels for signals, unit on y axis
   const chartRef = useRef(null);
 
   const numberOfSamples = edf?.getSignalNumberOfSamplesPerRecord(0); // those will be the same for every signal
