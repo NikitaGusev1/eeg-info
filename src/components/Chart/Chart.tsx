@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useContext, useMemo, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,6 +14,7 @@ import zoomPlugin from "chartjs-plugin-zoom";
 import autocolors from "chartjs-plugin-autocolors";
 import { Button, styled as muiStyled } from "@mui/material";
 import styled from "styled-components";
+import { ChartContext } from "../../contexts/ChartContext";
 
 interface Props {
   edf: any;
@@ -34,6 +35,7 @@ ChartJS.register(
 
 export const Chart = ({ edf }: Props) => {
   // TODO: labels for signals, unit on y axis
+  const { selectedSignals } = useContext(ChartContext);
   const chartRef = useRef(null);
 
   const numberOfSamples = edf?.getSignalNumberOfSamplesPerRecord(0); // those will be the same for every signal
@@ -49,6 +51,8 @@ export const Chart = ({ edf }: Props) => {
 
   const options = useMemo(() => {
     return {
+      responsive: true,
+      maintainAspectRatio: false,
       datasets: {
         line: {
           pointRadius: 0,
@@ -64,7 +68,7 @@ export const Chart = ({ edf }: Props) => {
           type: "linear",
           ticks: {
             callback: function (value: number) {
-              return value + "s"; // Format the tick label with 's'
+              return value + "s";
             },
           },
         },
@@ -106,39 +110,40 @@ export const Chart = ({ edf }: Props) => {
     return data;
   }, [edf, durationOneSample]);
 
-  const data = {
-    labels: xLabels,
-    datasets: [
-      {
-        label: "Dataset 1",
-        data: edf?.getPhysicalSignalConcatRecords(0, 0, numberOfRecords),
-      },
-      {
-        label: "Dataset 2",
-        data: edf?.getPhysicalSignalConcatRecords(1, 0, 1280),
-      },
-      {
-        label: "Dataset 3",
-        data: edf?.getPhysicalSignalConcatRecords(2, 0, 1280),
-      },
-    ],
-  };
+  const data = useMemo(() => {
+    const datasets = selectedSignals.map((signalIndex) => ({
+      label: edf?.getSignalLabel(signalIndex),
+      data: edf?.getPhysicalSignalConcatRecords(
+        signalIndex,
+        0,
+        numberOfRecords
+      ),
+    }));
+
+    return {
+      labels: xLabels,
+      datasets,
+    };
+  }, [selectedSignals, edf, numberOfRecords, xLabels]);
 
   return (
-    <Container>
+    <>
+      <Container>
+        <Line options={options} data={data} ref={chartRef} />
+      </Container>
       <ResetButton onClick={handleResetZoom} variant="contained">
         Reset zoom
       </ResetButton>
-      <Line options={options} data={data} ref={chartRef} />
-    </Container>
+    </>
   );
 };
-
-const Container = styled.div`
-  width: ${window.innerWidth}px;
-  height: ${window.innerHeight}px;
-`;
 
 const ResetButton = muiStyled(Button)({
   backgroundColor: "red",
 });
+
+const Container = styled.div`
+  position: relative;
+  height: 80vh;
+  width: 80vw;
+`;
