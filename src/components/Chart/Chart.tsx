@@ -41,7 +41,8 @@ export const Chart = ({ edf }: Props) => {
   const numberOfSamples = edf?.getSignalNumberOfSamplesPerRecord(0); // those will be the same for every signal
   const recordDuration = edf?.getRecordDuration();
   const durationOneSample = numberOfSamples / recordDuration;
-  const numberOfRecords = edf.getNumberOfRecords();
+  const numberOfRecords = edf?.getNumberOfRecords();
+  const microVoltUnit = edf?.getSignalPhysicalUnit(0); // same for all signals
 
   const handleResetZoom = () => {
     if (chartRef && chartRef.current) {
@@ -69,6 +70,13 @@ export const Chart = ({ edf }: Props) => {
           ticks: {
             callback: function (value: number) {
               return value + "s";
+            },
+          },
+        },
+        y: {
+          ticks: {
+            callback: function (value: number) {
+              return `${value} ${microVoltUnit}`;
             },
           },
         },
