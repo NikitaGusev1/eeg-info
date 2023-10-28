@@ -10,9 +10,12 @@ export const ChartContext = createContext({
   handleChangeSignals: (index: number) => {},
   selectorOpen: false,
   setSelectorOpen: (open: boolean) => {},
+  edf: null,
+  setEdf: (edf: any) => {},
 });
 
 export const ChartContextProvider = ({ children }: Props) => {
+  const [edf, setEdf] = useState(null);
   const [selectedSignals, setSelectedSignals] = useState<number[]>([]);
   const [selectorOpen, setSelectorOpen] = useState(false);
 
@@ -33,6 +36,8 @@ export const ChartContextProvider = ({ children }: Props) => {
       handleChangeSignals,
       selectorOpen,
       setSelectorOpen,
+      edf,
+      setEdf,
     };
   }, [
     selectedSignals,
@@ -40,6 +45,8 @@ export const ChartContextProvider = ({ children }: Props) => {
     handleChangeSignals,
     selectorOpen,
     setSelectorOpen,
+    edf,
+    setEdf,
   ]);
 
   return (

@@ -6,6 +6,7 @@ import {
   List,
   ListItem,
 } from "@mui/material";
+import { styled as muiStyled } from "@mui/material/styles";
 import { useContext, useMemo } from "react";
 import styled from "styled-components";
 import { ChartContext } from "../../contexts/ChartContext";
@@ -21,6 +22,7 @@ export const SelectSignalsModal = ({ edf }: Props) => {
     setSelectorOpen,
     selectorOpen,
     selectedSignals,
+    setEdf,
   } = useContext(ChartContext);
 
   const signalDuration = useMemo(() => {
@@ -29,7 +31,12 @@ export const SelectSignalsModal = ({ edf }: Props) => {
     return formatTime(duration);
   }, [edf]);
 
-  const handleClose = () => {
+  const handleSelect = () => {
+    setSelectorOpen(false);
+  };
+
+  const handleCancel = () => {
+    setEdf(null);
     setSelectorOpen(false);
   };
 
@@ -49,13 +56,18 @@ export const SelectSignalsModal = ({ edf }: Props) => {
             </ListItem>
           ))}
         </List>
-        <Button
-          variant="outlined"
-          onClick={() => handleClose()}
-          disabled={selectedSignals.length === 0}
-        >
-          Show chart
-        </Button>
+        <Row>
+          <Button
+            variant="outlined"
+            onClick={handleSelect}
+            disabled={selectedSignals.length === 0}
+          >
+            Show chart
+          </Button>
+          <CancelButton variant="outlined" onClick={handleCancel}>
+            Cancel
+          </CancelButton>
+        </Row>
       </DialogContent>
     </Dialog>
   );
@@ -72,3 +84,11 @@ const Index = styled.p`
 `;
 
 const Label = styled.p``;
+
+const CancelButton = muiStyled(Button)({});
+
+const Row = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+`;
