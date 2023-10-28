@@ -30,7 +30,7 @@ export const HomeScreen = () => {
       setSelectedSignals([]);
       setSelectorOpen(true);
     },
-    [setSelectorOpen, handleChangeFile]
+    [setSelectorOpen, handleChangeFile, setSelectedSignals]
   );
 
   return (

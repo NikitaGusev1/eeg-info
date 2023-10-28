@@ -9,6 +9,7 @@ import {
 import { useContext, useMemo } from "react";
 import styled from "styled-components";
 import { ChartContext } from "../../contexts/ChartContext";
+import { formatTime } from "../../utils";
 
 interface Props {
   edf: any;
@@ -22,8 +23,10 @@ export const SelectSignalsModal = ({ edf }: Props) => {
     selectedSignals,
   } = useContext(ChartContext);
 
-  const durationInSeconds = useMemo(() => {
-    return edf?.getRecordDuration() * edf?.getNumberOfRecords();
+  const signalDuration = useMemo(() => {
+    const duration = edf?.getRecordDuration() * edf?.getNumberOfRecords();
+
+    return formatTime(duration);
   }, [edf]);
 
   const handleClose = () => {
@@ -35,7 +38,7 @@ export const SelectSignalsModal = ({ edf }: Props) => {
       <DialogContent>
         <Subject>{`Subject: ${edf?.getPatientID()}`}</Subject>
         <Recording>{`Recording: ${edf?.getRecordingID()}`}</Recording>
-        <Duration>{`Duration: ${durationInSeconds} seconds`}</Duration>
+        <Duration>{`Duration: ${signalDuration}`}</Duration>
         <p>Select signals:</p>
         <List>
           {edf?._header.signalInfo?.map((signal: any, index: number) => (
