@@ -6,7 +6,7 @@ import { Chart } from "../Chart/Chart";
 
 export const HomeScreen = () => {
   const [edf, setEdf] = useState();
-  const { selectorOpen, setSelectorOpen, selectedSignals } =
+  const { selectorOpen, setSelectorOpen, selectedSignals, setSelectedSignals } =
     useContext(ChartContext);
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
@@ -27,6 +27,7 @@ export const HomeScreen = () => {
   const handleOpenSelector = useCallback(
     (event) => {
       handleChangeFile(event);
+      setSelectedSignals([]);
       setSelectorOpen(true);
     },
     [setSelectorOpen, handleChangeFile]

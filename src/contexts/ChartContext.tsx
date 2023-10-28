@@ -6,7 +6,7 @@ interface Props {
 
 export const ChartContext = createContext({
   selectedSignals: [] as number[],
-  setSelectedSignals: (index: number) => {},
+  setSelectedSignals: (indexes: number[]) => {},
   handleChangeSignals: (index: number) => {},
   selectorOpen: false,
   setSelectorOpen: (open: boolean) => {},

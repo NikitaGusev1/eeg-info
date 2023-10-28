@@ -15,8 +15,12 @@ interface Props {
 }
 
 export const SelectSignalsModal = ({ edf }: Props) => {
-  const { handleChangeSignals, setSelectorOpen, selectorOpen } =
-    useContext(ChartContext);
+  const {
+    handleChangeSignals,
+    setSelectorOpen,
+    selectorOpen,
+    selectedSignals,
+  } = useContext(ChartContext);
 
   const durationInSeconds = useMemo(() => {
     return edf?.getRecordDuration() * edf?.getNumberOfRecords();
@@ -42,7 +46,11 @@ export const SelectSignalsModal = ({ edf }: Props) => {
             </ListItem>
           ))}
         </List>
-        <Button variant="outlined" onClick={() => handleClose()}>
+        <Button
+          variant="outlined"
+          onClick={() => handleClose()}
+          disabled={selectedSignals.length === 0}
+        >
           Show chart
         </Button>
       </DialogContent>
