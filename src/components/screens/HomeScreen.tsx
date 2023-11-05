@@ -5,6 +5,9 @@ import { SelectSignalsModal } from "../modals/SelectSignalsModal";
 import { Chart } from "../Chart/Chart";
 import { LoginModal } from "../modals/LoginModal";
 import styled from "styled-components";
+import { UserContext } from "../../contexts/UserContext";
+
+// TODO: logout
 
 export const HomeScreen = () => {
   const {
@@ -15,6 +18,7 @@ export const HomeScreen = () => {
     setEdf,
     edf,
   } = useContext(ChartContext);
+  const { name } = useContext(UserContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
@@ -47,12 +51,12 @@ export const HomeScreen = () => {
   );
 
   return (
-    <div className="App">
+    <div className="App" style={{ padding: 16 }}>
       {!isLoggedIn ? (
         <LoginModal open={!isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
       ) : (
         <>
-          <UserName></UserName>
+          <UserName>{`Logged in as ${name}`}</UserName>
           <form>
             <input type="file" onChange={handleOpenSelector} accept=".edf" />
           </form>
@@ -64,4 +68,9 @@ export const HomeScreen = () => {
   );
 };
 
-const UserName = styled.p``;
+const UserName = styled.p`
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 16px;
+`;
