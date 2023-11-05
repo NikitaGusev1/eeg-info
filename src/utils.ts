@@ -34,3 +34,5 @@ export const formatTime = (seconds: number) => {
 
   return `${formattedMinutes}:${formattedSeconds}`;
 };
+
+export const baseUrl = "http://localhost:3001";

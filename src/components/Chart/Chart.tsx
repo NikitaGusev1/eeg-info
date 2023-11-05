@@ -34,7 +34,6 @@ ChartJS.register(
 );
 
 export const Chart = ({ edf }: Props) => {
-  // TODO: labels for signals, unit on y axis
   const { selectedSignals } = useContext(ChartContext);
   const chartRef = useRef(null);
 

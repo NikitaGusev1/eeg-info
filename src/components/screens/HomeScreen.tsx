@@ -1,8 +1,9 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import { decodeEdf, getInputFileBuffer } from "../../utils";
 import { ChartContext } from "../../contexts/ChartContext";
 import { SelectSignalsModal } from "../modals/SelectSignalsModal";
 import { Chart } from "../Chart/Chart";
+import { LoginModal } from "../modals/LoginModal";
 
 export const HomeScreen = () => {
   const {
@@ -13,6 +14,7 @@ export const HomeScreen = () => {
     setEdf,
     edf,
   } = useContext(ChartContext);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
   const isChartReady = edf && !selectorOpen && selectedSignals.length !== 0;
@@ -45,11 +47,17 @@ export const HomeScreen = () => {
 
   return (
     <div className="App">
-      <form>
-        <input type="file" onChange={handleOpenSelector} accept=".edf" />
-      </form>
-      <SelectSignalsModal edf={edf} />
-      {isChartReady && <Chart edf={edf} />}
+      {!isLoggedIn ? (
+        <LoginModal open={!isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      ) : (
+        <>
+          <form>
+            <input type="file" onChange={handleOpenSelector} accept=".edf" />
+          </form>
+          <SelectSignalsModal edf={edf} />
+          {isChartReady && <Chart edf={edf} />}
+        </>
+      )}
     </div>
   );
 };
