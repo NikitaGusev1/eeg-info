@@ -4,6 +4,7 @@ import { ChartContext } from "../../contexts/ChartContext";
 import { SelectSignalsModal } from "../modals/SelectSignalsModal";
 import { Chart } from "../Chart/Chart";
 import { LoginModal } from "../modals/LoginModal";
+import styled from "styled-components";
 
 export const HomeScreen = () => {
   const {
@@ -51,6 +52,7 @@ export const HomeScreen = () => {
         <LoginModal open={!isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
       ) : (
         <>
+          <UserName></UserName>
           <form>
             <input type="file" onChange={handleOpenSelector} accept=".edf" />
           </form>
@@ -61,3 +63,5 @@ export const HomeScreen = () => {
     </div>
   );
 };
+
+const UserName = styled.p``;

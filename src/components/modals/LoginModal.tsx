@@ -11,9 +11,12 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import styled from "styled-components";
 import { baseUrl } from "../../utils";
+import { UserContext } from "../../contexts/UserContext";
+
+// TODO: better pw requirements
 
 interface Props {
   open: boolean;
@@ -21,10 +24,10 @@ interface Props {
 }
 
 export const LoginModal = ({ open, setIsLoggedIn }: Props) => {
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { setName, setEmail, email } = useContext(UserContext);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -50,7 +53,7 @@ export const LoginModal = ({ open, setIsLoggedIn }: Props) => {
         const data = await response.json();
         const token = data.token;
         localStorage.setItem("token", token);
-
+        setName(data.name);
         setIsLoggedIn(true);
       }
       if (response.status === 401) {
