@@ -18,8 +18,8 @@ export const HomeScreen = () => {
     setEdf,
     edf,
   } = useContext(ChartContext);
-  const { name } = useContext(UserContext);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { name, isLoggedIn } = useContext(UserContext);
+
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
   const isChartReady = edf && !selectorOpen && selectedSignals.length !== 0;
@@ -53,7 +53,7 @@ export const HomeScreen = () => {
   return (
     <div className="App" style={{ padding: 16 }}>
       {!isLoggedIn ? (
-        <LoginModal open={!isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+        <LoginModal />
       ) : (
         <>
           <UserName>{`Logged in as ${name}`}</UserName>

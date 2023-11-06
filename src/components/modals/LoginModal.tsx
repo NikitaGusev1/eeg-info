@@ -18,16 +18,12 @@ import { UserContext } from "../../contexts/UserContext";
 
 // TODO: better pw requirements
 
-interface Props {
-  open: boolean;
-  setIsLoggedIn: (loggedIn: boolean) => void;
-}
-
-export const LoginModal = ({ open, setIsLoggedIn }: Props) => {
+export const LoginModal = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { setName, setEmail, email } = useContext(UserContext);
+  const { setName, setEmail, email, isLoggedIn, setIsLoggedIn } =
+    useContext(UserContext);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -65,7 +61,7 @@ export const LoginModal = ({ open, setIsLoggedIn }: Props) => {
   };
 
   return (
-    <Dialog open={open}>
+    <Dialog open={!isLoggedIn}>
       <DialogContent>
         <DialogTitle>Login to EEG-Info</DialogTitle>
         <Column>
