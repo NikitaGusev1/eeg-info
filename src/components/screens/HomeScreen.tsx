@@ -1,11 +1,12 @@
-import { useCallback, useContext, useState } from "react";
-import { decodeEdf, getInputFileBuffer } from "../../utils";
+import { useCallback, useContext, useEffect } from "react";
+import { baseUrl, decodeEdf, getInputFileBuffer } from "../../utils";
 import { ChartContext } from "../../contexts/ChartContext";
 import { SelectSignalsModal } from "../modals/SelectSignalsModal";
 import { Chart } from "../Chart/Chart";
 import { LoginModal } from "../modals/LoginModal";
 import styled from "styled-components";
 import { UserContext } from "../../contexts/UserContext";
+import api from "../../api/api";
 
 // TODO: logout
 
@@ -18,11 +19,26 @@ export const HomeScreen = () => {
     setEdf,
     edf,
   } = useContext(ChartContext);
-  const { name, isLoggedIn } = useContext(UserContext);
+  const { name, isLoggedIn, setName, setEmail } = useContext(UserContext);
 
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
   const isChartReady = edf && !selectorOpen && selectedSignals.length !== 0;
+
+  const tryFetchingUserData = async () => {
+    if (isLoggedIn) {
+      const response = await api.get(`${baseUrl}/user`);
+      if (response.status === 200) {
+        const userData = response.data[0];
+        setEmail(userData.email);
+        setName(userData.name);
+      }
+    }
+  };
+
+  useEffect(() => {
+    tryFetchingUserData();
+  }, []);
 
   const handleChangeFile = useCallback(
     async (event: any) => {

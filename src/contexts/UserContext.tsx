@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useMemo, useState } from "react";
+import { ReactNode, createContext, useEffect, useMemo, useState } from "react";
 
 interface Props {
   children?: ReactNode | ReactNode[];
@@ -16,7 +16,7 @@ export const UserContext = createContext({
 export const UserContextProvider = ({ children }: Props) => {
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
   const value = useMemo(() => {
     return {
