@@ -7,8 +7,7 @@ import { LoginModal } from "../modals/LoginModal";
 import styled from "styled-components";
 import { UserContext } from "../../contexts/UserContext";
 import api from "../../api/api";
-
-// TODO: logout
+import { Button } from "@mui/material";
 
 export const HomeScreen = () => {
   const {
@@ -19,21 +18,22 @@ export const HomeScreen = () => {
     setEdf,
     edf,
   } = useContext(ChartContext);
-  const { name, isLoggedIn, setName, setEmail } = useContext(UserContext);
+  const { name, isLoggedIn, setName, setEmail, setIsLoggedIn } =
+    useContext(UserContext);
 
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
   const isChartReady = edf && !selectorOpen && selectedSignals.length !== 0;
 
   const tryFetchingUserData = async () => {
-    // if (isLoggedIn) {
     const response = await api.get(`${baseUrl}/user`);
     console.log(response.status);
-    if (response.status === 200 || response.status === 304) {
+    if (response.status === 200) {
+      setIsLoggedIn(true);
+
       const userData = response.data[0];
       setEmail(userData.email);
       setName(userData.name);
-      // }
     }
   };
 
@@ -67,13 +67,23 @@ export const HomeScreen = () => {
     [setSelectorOpen, handleChangeFile, setSelectedSignals]
   );
 
+  const handleLogout = () => {
+    localStorage.clear();
+    setIsLoggedIn(false);
+  };
+
   return (
     <div className="App" style={{ padding: 16 }}>
       {!isLoggedIn ? (
         <LoginModal />
       ) : (
         <>
-          <UserName>{`Logged in as ${name}`}</UserName>
+          <TopRightContainer>
+            <UserName>{`Logged in as ${name}`}</UserName>
+            <Button onClick={handleLogout} variant="outlined">
+              Logout
+            </Button>
+          </TopRightContainer>
           <form>
             <input type="file" onChange={handleOpenSelector} accept=".edf" />
           </form>
@@ -86,6 +96,10 @@ export const HomeScreen = () => {
 };
 
 const UserName = styled.p`
+  margin-right: 16px;
+`;
+
+const TopRightContainer = styled.div`
   position: fixed;
   top: 0;
   right: 0;
