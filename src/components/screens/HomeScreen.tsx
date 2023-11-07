@@ -26,14 +26,15 @@ export const HomeScreen = () => {
   const isChartReady = edf && !selectorOpen && selectedSignals.length !== 0;
 
   const tryFetchingUserData = async () => {
-    const response = await api.get(`${baseUrl}/user`);
-    console.log(response.status);
-    if (response.status === 200) {
-      setIsLoggedIn(true);
+    if (!!localStorage.getItem("token")) {
+      const response = await api.get(`${baseUrl}/user`);
+      if (response.status === 200) {
+        setIsLoggedIn(true);
 
-      const userData = response.data[0];
-      setEmail(userData.email);
-      setName(userData.name);
+        const userData = response.data[0];
+        setEmail(userData.email);
+        setName(userData.name);
+      }
     }
   };
 

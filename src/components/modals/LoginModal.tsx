@@ -33,30 +33,50 @@ export const LoginModal = () => {
     event.preventDefault();
   };
 
+  const isPasswordValid = () => {
+    const hasNumber = /\d/;
+    const hasSpecialCharacter = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/;
+    const hasUppercaseLetter = /[A-Z]/;
+
+    return (
+      password.length >= 8 &&
+      hasNumber.test(password) &&
+      hasSpecialCharacter.test(password) &&
+      hasUppercaseLetter.test(password)
+    );
+  };
+
   const handleLogin = async () => {
-    try {
-      const response = await fetch(`${baseUrl}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const passwordValid = isPasswordValid();
+    if (passwordValid) {
+      try {
+        const response = await fetch(`${baseUrl}/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
 
-      if (response.ok) {
-        setErrorMessage("");
+        if (response.ok) {
+          setErrorMessage("");
 
-        const data = await response.json();
-        const token = data.token;
-        localStorage.setItem("token", token);
-        setName(data.name);
-        setIsLoggedIn(true);
+          const data = await response.json();
+          const token = data.token;
+          localStorage.setItem("token", token);
+          setName(data.name);
+          setIsLoggedIn(true);
+        }
+        if (response.status === 401) {
+          setErrorMessage("Wrong email or password");
+        }
+      } catch (error) {
+        console.log(error);
       }
-      if (response.status === 401) {
-        setErrorMessage("Wrong email or password");
-      }
-    } catch (error) {
-      console.log(error);
+    } else {
+      setErrorMessage(
+        "Password has to be minimum 8 characters and include one uppercase letter, one number and one special character"
+      );
     }
   };
 
