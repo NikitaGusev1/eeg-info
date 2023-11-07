@@ -17,6 +17,7 @@ export const UserContextProvider = ({ children }: Props) => {
   const [name, setName] = useState(null);
   const [email, setEmail] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  console.log(`is logged in ${isLoggedIn}`);
 
   const value = useMemo(() => {
     return {

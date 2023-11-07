@@ -26,19 +26,20 @@ export const HomeScreen = () => {
   const isChartReady = edf && !selectorOpen && selectedSignals.length !== 0;
 
   const tryFetchingUserData = async () => {
-    if (isLoggedIn) {
-      const response = await api.get(`${baseUrl}/user`);
-      if (response.status === 200) {
-        const userData = response.data[0];
-        setEmail(userData.email);
-        setName(userData.name);
-      }
+    // if (isLoggedIn) {
+    const response = await api.get(`${baseUrl}/user`);
+    console.log(response.status);
+    if (response.status === 200 || response.status === 304) {
+      const userData = response.data[0];
+      setEmail(userData.email);
+      setName(userData.name);
+      // }
     }
   };
 
   useEffect(() => {
     tryFetchingUserData();
-  }, []);
+  }, [tryFetchingUserData]);
 
   const handleChangeFile = useCallback(
     async (event: any) => {

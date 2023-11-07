@@ -1,62 +1,63 @@
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 
+// Function to renew the token
+async function renewToken() {
+  try {
+    const response = await axios.post("/renewToken");
+    const newToken = response.data.token;
+    // Update the token in local storage
+    localStorage.setItem("token", newToken);
+    return newToken;
+  } catch (error) {
+    // Handle the error (e.g., log or redirect to login page)
+    throw error;
+  }
+}
+
+// Create an Axios instance
 const api = axios.create({
   baseURL: "http://localhost:3001",
 });
 
-let isRefreshing = false;
-let refreshSubscribers = [];
-
-async function renewToken() {
-  try {
-    console.log("renew call");
-    const response = await api.post("/renewToken");
-    const newToken = response.data.token;
-
-    localStorage.setItem("token", newToken);
-
-    api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
-
-    isRefreshing = false;
-
-    // Execute all the requests in the queue that were waiting for the token renewal
-    refreshSubscribers.forEach((callback) => callback(newToken));
-    refreshSubscribers = [];
-  } catch (error) {
-    console.log(error);
-    isRefreshing = false;
-  }
-}
-
+// Add a request interceptor
 api.interceptors.request.use(
   async (config) => {
-    let token = localStorage.getItem("token");
+    // Get the current token from local storage
+    const token = localStorage.getItem("token");
+
+    // Set the token in the request headers
     if (token) {
-      const decodedToken = jwtDecode(token);
-      const currentTimestamp = Math.floor(Date.now() / 1000);
-
-      if (decodedToken.exp - currentTimestamp < 300 && !isRefreshing) {
-        isRefreshing = true;
-        renewToken();
-      }
-
-      if (isRefreshing) {
-        // If a token renewal is in progress, queue this request and wait for the new token
-        return new Promise((resolve) => {
-          refreshSubscribers.push((newToken) => {
-            config.headers.Authorization = `Bearer ${newToken}`;
-            resolve(config);
-          });
-        });
-      } else {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
 
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to handle token renewal
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token expired, attempt to renew it
+      try {
+        const newToken = await renewToken();
+        // Update the request's headers with the new token
+        error.config.headers["Authorization"] = `Bearer ${newToken}`;
+        // Retry the original request with the new token
+        return api(error.config);
+      } catch (renewError) {
+        // Handle the error from renewToken() (e.g., log or redirect to login page)
+        return Promise.reject(renewError);
+      }
+    }
+
+    // For other errors, simply reject the promise
     return Promise.reject(error);
   }
 );
