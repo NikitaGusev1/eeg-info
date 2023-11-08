@@ -8,6 +8,7 @@ import styled from "styled-components";
 import { UserContext } from "../../contexts/UserContext";
 import api from "../../api/api";
 import { Button } from "@mui/material";
+import Dashboard from "../Dashboard/Dashboard";
 
 export const HomeScreen = () => {
   const {
@@ -18,8 +19,15 @@ export const HomeScreen = () => {
     setEdf,
     edf,
   } = useContext(ChartContext);
-  const { name, isLoggedIn, setName, setEmail, setIsLoggedIn } =
-    useContext(UserContext);
+  const {
+    name,
+    isLoggedIn,
+    setName,
+    setEmail,
+    setIsLoggedIn,
+    setIsAdmin,
+    isAdmin,
+  } = useContext(UserContext);
 
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
@@ -32,8 +40,10 @@ export const HomeScreen = () => {
         setIsLoggedIn(true);
 
         const userData = response.data[0];
+        console.log(userData);
         setEmail(userData.email);
         setName(userData.name);
+        setIsAdmin(userData.isAdmin);
       }
     }
   };
@@ -81,6 +91,7 @@ export const HomeScreen = () => {
         <>
           <TopRightContainer>
             <UserName>{`Logged in as ${name}`}</UserName>
+            {isAdmin && <Dashboard />}
             <Button onClick={handleLogout} variant="outlined">
               Logout
             </Button>
