@@ -16,8 +16,6 @@ import styled from "styled-components";
 import { baseUrl } from "../../utils";
 import { UserContext } from "../../contexts/UserContext";
 
-// TODO: better pw requirements
-
 export const LoginModal = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
