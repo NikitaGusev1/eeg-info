@@ -36,3 +36,16 @@ export const formatTime = (seconds: number) => {
 };
 
 export const baseUrl = "http://localhost:3001";
+
+export function convertFileToBase64(file, callback) {
+  if (file) {
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+      const base64String = event.target?.result?.split(",")[1];
+      callback(base64String);
+    };
+
+    reader.readAsDataURL(file);
+  }
+}

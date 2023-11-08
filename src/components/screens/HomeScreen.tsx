@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { baseUrl, decodeEdf, getInputFileBuffer } from "../../utils";
 import { ChartContext } from "../../contexts/ChartContext";
 import { SelectSignalsModal } from "../modals/SelectSignalsModal";
@@ -9,6 +9,7 @@ import { UserContext } from "../../contexts/UserContext";
 import api from "../../api/api";
 import { Button } from "@mui/material";
 import Dashboard from "../Dashboard/Dashboard";
+import { AssignFileModal } from "../modals/AssignFileModal";
 
 export const HomeScreen = () => {
   const {
@@ -28,6 +29,7 @@ export const HomeScreen = () => {
     setIsAdmin,
     isAdmin,
   } = useContext(UserContext);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
 
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
@@ -83,6 +85,10 @@ export const HomeScreen = () => {
     setIsLoggedIn(false);
   };
 
+  const handleCloseAssignModal = () => {
+    setIsAssignModalOpen(false);
+  };
+
   return (
     <div className="App" style={{ padding: 16 }}>
       {!isLoggedIn ? (
@@ -91,7 +97,9 @@ export const HomeScreen = () => {
         <>
           <TopRightContainer>
             <UserName>{`Logged in as ${name}`}</UserName>
-            {isAdmin && <Dashboard />}
+            {isAdmin && (
+              <Dashboard setIsAssignModalOpen={setIsAssignModalOpen} />
+            )}
             <Button onClick={handleLogout} variant="outlined">
               Logout
             </Button>
@@ -100,6 +108,10 @@ export const HomeScreen = () => {
             <input type="file" onChange={handleOpenSelector} accept=".edf" />
           </form>
           <SelectSignalsModal edf={edf} />
+          <AssignFileModal
+            open={isAssignModalOpen}
+            handleCloseAssignModal={handleCloseAssignModal}
+          />
           {isChartReady && <Chart edf={edf} />}
         </>
       )}
