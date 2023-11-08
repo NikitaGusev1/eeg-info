@@ -47,37 +47,37 @@ export const LoginModal = () => {
   };
 
   const handleLogin = async () => {
-    const passwordValid = isPasswordValid();
-    if (passwordValid) {
-      try {
-        const response = await fetch(`${baseUrl}/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
+    // const passwordValid = isPasswordValid();
+    // if (passwordValid) {
+    try {
+      const response = await fetch(`${baseUrl}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-        if (response.ok) {
-          setErrorMessage("");
+      if (response.ok) {
+        setErrorMessage("");
 
-          const data = await response.json();
-          const token = data.token;
-          localStorage.setItem("token", token);
-          setName(data.name);
-          setIsLoggedIn(true);
-        }
-        if (response.status === 401) {
-          setErrorMessage("Wrong email or password");
-        }
-      } catch (error) {
-        console.log(error);
+        const data = await response.json();
+        const token = data.token;
+        localStorage.setItem("token", token);
+        setName(data.name);
+        setIsLoggedIn(true);
       }
-    } else {
-      setErrorMessage(
-        "Password has to be minimum 8 characters and include one uppercase letter, one number and one special character"
-      );
+      if (response.status === 401) {
+        setErrorMessage("Wrong email or password");
+      }
+    } catch (error) {
+      console.log(error);
     }
+    // } else {
+    //   setErrorMessage(
+    //     "Password has to be minimum 8 characters and include one uppercase letter, one number and one special character"
+    //   );
+    // }
   };
 
   return (
