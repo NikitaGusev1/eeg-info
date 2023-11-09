@@ -37,15 +37,28 @@ export const formatTime = (seconds: number) => {
 
 export const baseUrl = "http://localhost:3001";
 
-export function convertFileToBase64(file, callback) {
-  if (file) {
-    const reader = new FileReader();
+export function convertFilesToBase64(files, callback) {
+  if (files && files.length > 0) {
+    const base64Strings: string[] = [];
+    let filesProcessed = 0;
 
-    reader.onload = function (event) {
+    const handleFileRead = (event) => {
       const base64String = event.target?.result?.split(",")[1];
-      callback(base64String);
+      base64Strings.push(base64String);
+
+      filesProcessed++;
+      if (filesProcessed === files.length) {
+        callback(base64Strings);
+      }
     };
 
-    reader.readAsDataURL(file);
+    const readFile = (file) => {
+      const reader = new FileReader();
+      reader.onload = handleFileRead;
+      reader.readAsDataURL(file);
+    };
+
+    // Read each file
+    files.forEach((file) => readFile(file));
   }
 }
