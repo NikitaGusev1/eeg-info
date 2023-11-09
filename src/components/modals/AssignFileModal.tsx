@@ -7,10 +7,10 @@ import {
   InputLabel,
   OutlinedInput,
 } from "@mui/material";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 import { baseUrl, convertFilesToBase64 } from "../../utils";
-import { UserContext } from "../../contexts/UserContext";
+import api from "../../api/api";
 
 interface Props {
   open: boolean;
@@ -38,6 +38,18 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
     },
     [fileStrings]
   );
+
+  const handleAssign = async () => {
+    await api.post(`${baseUrl}/assignFiles`, {
+      email,
+      files: fileStrings,
+    });
+  };
+
+  const handleCancel = () => {
+    setFileStrings([]);
+    handleCloseAssignModal();
+  };
 
   return (
     <Dialog open={open}>
@@ -70,12 +82,12 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
         >
           <Button
             variant="outlined"
-            // onClick={}
-            // disabled={selectedSignals.length === 0}
+            onClick={handleAssign}
+            disabled={!email || fileStrings.length === 0}
           >
             Assign
           </Button>
-          <Button variant="outlined" onClick={handleCloseAssignModal}>
+          <Button variant="outlined" onClick={handleCancel}>
             Cancel
           </Button>
         </div>
