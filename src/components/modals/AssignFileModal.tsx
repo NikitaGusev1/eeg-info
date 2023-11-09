@@ -19,7 +19,7 @@ interface Props {
 
 export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
   const [email, setEmail] = useState("");
-  const [fileStrings, setFileStrings] = useState([]);
+  const [fileStrings, setFileStrings] = useState<string[]>([]);
 
   const handleFilesChange = useCallback(
     async (event) => {
@@ -29,7 +29,7 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
 
       const files = Array.from(event.target.files);
 
-      convertFilesToBase64(files, (base64Strings) => {
+      convertFilesToBase64(files, (base64Strings: string[]) => {
         setFileStrings(base64Strings);
         console.log(base64Strings);
       });
