@@ -41,8 +41,7 @@ export const HomeScreen = () => {
       if (response.status === 200) {
         setIsLoggedIn(true);
 
-        const userData = response.data[0];
-        console.log(userData);
+        const userData = response.data;
         setEmail(userData.email);
         setName(userData.name);
         setIsAdmin(userData.isAdmin);
