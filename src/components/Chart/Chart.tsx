@@ -15,6 +15,7 @@ import autocolors from "chartjs-plugin-autocolors";
 import { Button, styled as muiStyled } from "@mui/material";
 import styled from "styled-components";
 import { ChartContext } from "../../contexts/ChartContext";
+import api from "../../api/api";
 
 interface Props {
   edf: any;
@@ -133,6 +134,21 @@ export const Chart = ({ edf }: Props) => {
     };
   }, [selectedSignals, edf, numberOfRecords, xLabels]);
 
+  console.log(Array.from(data.datasets[0].data));
+
+  // TODO: make proper peaks func
+
+  const findPeaks = async () => {
+    try {
+      const response = await api.post("http://localhost:3001/findPeaks", {
+        data: Array.from(data.datasets[0].data),
+      });
+      // console.log(response.data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <>
       <Container>
@@ -141,6 +157,9 @@ export const Chart = ({ edf }: Props) => {
       <ResetButton onClick={handleResetZoom} variant="contained">
         Reset zoom
       </ResetButton>
+      <Button variant="outlined" onClick={findPeaks}>
+        Find peaks
+      </Button>
     </>
   );
 };
