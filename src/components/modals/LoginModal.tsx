@@ -20,8 +20,14 @@ export const LoginModal = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { setName, setEmail, email, isLoggedIn, setIsLoggedIn } =
-    useContext(UserContext);
+  const {
+    setFirstName,
+    setLastName,
+    setEmail,
+    email,
+    isLoggedIn,
+    setIsLoggedIn,
+  } = useContext(UserContext);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -62,7 +68,8 @@ export const LoginModal = () => {
         const data = await response.json();
         const token = data.token;
         localStorage.setItem("token", token);
-        setName(data.name);
+        setFirstName(data.firstName);
+        setLastName(data.lastName);
         setIsLoggedIn(true);
       }
       if (response.status === 401) {

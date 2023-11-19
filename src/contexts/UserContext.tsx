@@ -5,8 +5,9 @@ interface Props {
 }
 
 export const UserContext = createContext({
-  name: null,
   email: null,
+  firstName: null,
+  lastName: null,
   isLoggedIn: false,
   isAdmin: false,
   setFirstName: (name: string) => {},

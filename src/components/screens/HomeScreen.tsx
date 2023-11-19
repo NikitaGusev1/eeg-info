@@ -22,7 +22,8 @@ export const HomeScreen = () => {
     edf,
   } = useContext(ChartContext);
   const {
-    name,
+    firstName,
+    lastName,
     isLoggedIn,
     setFirstName,
     setLastName,
@@ -103,7 +104,7 @@ export const HomeScreen = () => {
       ) : (
         <>
           <TopRightContainer>
-            <UserName>{`Logged in as ${name}`}</UserName>
+            <UserName>{`Logged in as ${firstName} ${lastName}`}</UserName>
             {isAdmin && (
               <Dashboard
                 setIsAssignModalOpen={setIsAssignModalOpen}
