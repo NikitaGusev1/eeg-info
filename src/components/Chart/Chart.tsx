@@ -82,6 +82,44 @@ export const Chart = ({ edf }: Props) => {
         },
       },
       plugins: {
+        autocolors: {
+          customize(context) {
+            const colors = context.colors;
+
+            const randomizeColor = () => {
+              const letters = "0123456789ABCDEF";
+              let color = "#";
+              for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+              }
+              return color;
+            };
+
+            const calculateLuminance = (color) => {
+              const rgb = parseInt(color.slice(1), 16);
+              const r = (rgb >> 16) & 0xff;
+              const g = (rgb >> 8) & 0xff;
+              const b = (rgb >> 0) & 0xff;
+
+              return 0.299 * r + 0.587 * g + 0.114 * b;
+            };
+
+            let randomColor;
+            let luminanceDifference;
+            do {
+              randomColor = randomizeColor();
+              luminanceDifference = Math.abs(
+                calculateLuminance(colors.background) -
+                  calculateLuminance(randomColor)
+              );
+            } while (luminanceDifference < 128);
+
+            return {
+              background: randomColor,
+              border: randomColor,
+            };
+          },
+        },
         tooltip: {
           events: [],
         },
