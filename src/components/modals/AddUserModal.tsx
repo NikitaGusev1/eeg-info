@@ -23,12 +23,17 @@ interface Props {
 export const AddUserModal = ({ open, handleCloseAddUserModal }: Props) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [generatedPassword, setGeneratedPassword] = useState("");
+  const [generatedEmail, setGeneratedEmail] = useState("");
 
   const handleAddUser = async () => {
     const response = await api.post(`${baseUrl}/addUser`, {
       firstName,
       lastName,
     });
+
+    setGeneratedEmail(response.data.email);
+    setGeneratedPassword(response.data.password);
 
     handleNotify(response);
   };
@@ -37,6 +42,8 @@ export const AddUserModal = ({ open, handleCloseAddUserModal }: Props) => {
     handleCloseAddUserModal();
     setFirstName("");
     setLastName("");
+    setGeneratedEmail("");
+    setGeneratedPassword("");
   };
 
   const handleNotify = (response: AxiosResponse<any, any>) => {
@@ -54,8 +61,6 @@ export const AddUserModal = ({ open, handleCloseAddUserModal }: Props) => {
     } else {
       toast(`${response.data.message}`);
     }
-
-    handleCancel();
   };
 
   return (
@@ -81,6 +86,16 @@ export const AddUserModal = ({ open, handleCloseAddUserModal }: Props) => {
               />
             </Column>
           </FormControl>
+          {generatedPassword && generatedEmail && (
+            <>
+              <p
+                style={{ textAlign: "center" }}
+              >{`Generated email: ${generatedEmail}`}</p>
+              <p
+                style={{ textAlign: "center" }}
+              >{`Generated password: ${generatedPassword}`}</p>
+            </>
+          )}
           <div
             style={{
               justifyContent: "space-between",
