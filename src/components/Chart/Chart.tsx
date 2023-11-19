@@ -208,6 +208,6 @@ const ResetButton = muiStyled(Button)({
 
 const Container = styled.div`
   position: relative;
-  height: 80vh;
+  height: 75vh;
   width: 95vw;
 `;

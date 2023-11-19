@@ -5,9 +5,13 @@ import MenuItem from "@mui/material/MenuItem";
 
 interface Props {
   setIsAssignModalOpen: (isOpen: boolean) => void;
+  setIsAddUserModalOpen: (isOpen: boolean) => void;
 }
 
-export default function Dashboard({ setIsAssignModalOpen }: Props) {
+export default function Dashboard({
+  setIsAssignModalOpen,
+  setIsAddUserModalOpen,
+}: Props) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -24,6 +28,11 @@ export default function Dashboard({ setIsAssignModalOpen }: Props) {
     handleClose();
   };
 
+  const handleAddUserClick = () => {
+    setIsAddUserModalOpen(true);
+    handleClose();
+  };
+
   return (
     <>
       <Button
@@ -34,7 +43,7 @@ export default function Dashboard({ setIsAssignModalOpen }: Props) {
         Dashboard
       </Button>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem onClick={handleClose}>Add User</MenuItem>
+        <MenuItem onClick={handleAddUserClick}>Add User</MenuItem>
         <MenuItem onClick={handleAssignClick}>Assign File</MenuItem>
       </Menu>
     </>

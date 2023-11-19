@@ -10,6 +10,7 @@ import api from "../../api/api";
 import { Button } from "@mui/material";
 import Dashboard from "../Dashboard/Dashboard";
 import { AssignFileModal } from "../modals/AssignFileModal";
+import { AddUserModal } from "../modals/AddUserModal";
 
 export const HomeScreen = () => {
   const {
@@ -23,13 +24,15 @@ export const HomeScreen = () => {
   const {
     name,
     isLoggedIn,
-    setName,
+    setFirstName,
+    setLastName,
     setEmail,
     setIsLoggedIn,
     setIsAdmin,
     isAdmin,
   } = useContext(UserContext);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
@@ -43,7 +46,8 @@ export const HomeScreen = () => {
 
         const userData = response.data;
         setEmail(userData.email);
-        setName(userData.name);
+        setFirstName(userData.firstName);
+        setLastName(userData.lastName);
         setIsAdmin(userData.isAdmin);
       }
     }
@@ -88,6 +92,10 @@ export const HomeScreen = () => {
     setIsAssignModalOpen(false);
   };
 
+  const handleCloseAddUserModal = () => {
+    setIsAddUserModalOpen(false);
+  };
+
   return (
     <div className="App" style={{ padding: 16 }}>
       {!isLoggedIn ? (
@@ -97,7 +105,10 @@ export const HomeScreen = () => {
           <TopRightContainer>
             <UserName>{`Logged in as ${name}`}</UserName>
             {isAdmin && (
-              <Dashboard setIsAssignModalOpen={setIsAssignModalOpen} />
+              <Dashboard
+                setIsAssignModalOpen={setIsAssignModalOpen}
+                setIsAddUserModalOpen={setIsAddUserModalOpen}
+              />
             )}
             <Button onClick={handleLogout} variant="outlined">
               Logout
@@ -110,6 +121,10 @@ export const HomeScreen = () => {
           <AssignFileModal
             open={isAssignModalOpen}
             handleCloseAssignModal={handleCloseAssignModal}
+          />
+          <AddUserModal
+            open={isAddUserModalOpen}
+            handleCloseAddUserModal={handleCloseAddUserModal}
           />
           {isChartReady && <Chart edf={edf} />}
         </>
