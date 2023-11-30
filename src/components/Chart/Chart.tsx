@@ -43,6 +43,7 @@ export const Chart = ({ edf }: Props) => {
   const durationOneSample = numberOfSamples / recordDuration;
   const numberOfRecords = edf?.getNumberOfRecords();
   const microVoltUnit = edf?.getSignalPhysicalUnit(0); // same for all signals
+  const samplingFrequency = edf?.getSignalSamplingFrequency(0); // same for all signals
 
   const handleResetZoom = () => {
     if (chartRef && chartRef.current) {
@@ -174,13 +175,19 @@ export const Chart = ({ edf }: Props) => {
 
   console.log(Array.from(data.datasets[0].data));
 
-  // TODO: make proper peaks func
-
   const findPeaks = async () => {
     try {
-      const response = await api.post("http://localhost:3001/findPeaks", {
-        data: Array.from(data.datasets[0].data),
+      const datasets = data.datasets.map((dataset) => {
+        return {
+          signal: Array.from(dataset.data),
+          samplingFrequency,
+        };
       });
+
+      const response = await api.post("http://localhost:3001/findPeaks", {
+        data: datasets,
+      });
+
       // console.log(response.data);
     } catch (error) {
       console.error("Error:", error);
