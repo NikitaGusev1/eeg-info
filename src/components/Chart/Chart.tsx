@@ -173,8 +173,6 @@ export const Chart = ({ edf }: Props) => {
     };
   }, [selectedSignals, edf, numberOfRecords, xLabels]);
 
-  console.log(Array.from(data.datasets[0].data));
-
   const findPeaks = async () => {
     try {
       const datasets = data.datasets.map((dataset) => {

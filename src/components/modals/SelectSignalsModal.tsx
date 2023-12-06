@@ -50,7 +50,10 @@ export const SelectSignalsModal = ({ edf }: Props) => {
         <List>
           {edf?._header.signalInfo?.map((signal: any, index: number) => (
             <ListItem key={signal.label}>
-              <Checkbox onChange={() => handleChangeSignals(index)} />
+              <Checkbox
+                checked={selectedSignals.includes(index) || false}
+                onChange={() => handleChangeSignals(index)}
+              />
               <Index>{`${index + 1}.`}</Index>
               <Label>{signal.label}</Label>
             </ListItem>
@@ -62,7 +65,10 @@ export const SelectSignalsModal = ({ edf }: Props) => {
             onClick={handleSelect}
             disabled={selectedSignals.length === 0}
           >
-            Show chart
+            Show Chart
+          </Button>
+          <Button variant="outlined" onClick={() => handleChangeSignals(-1)}>
+            Select All
           </Button>
           <CancelButton variant="outlined" onClick={handleCancel}>
             Cancel

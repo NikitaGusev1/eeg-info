@@ -20,7 +20,14 @@ export const ChartContextProvider = ({ children }: Props) => {
   const [selectorOpen, setSelectorOpen] = useState(false);
 
   const handleChangeSignals = (signalIndex: number) => {
-    if (selectedSignals.includes(signalIndex)) {
+    if (signalIndex === -1) {
+      // Special value indicating "Select All"
+      const allSignalIndices = Array.from(
+        { length: edf?._header.signalInfo.length },
+        (_, index) => index
+      );
+      setSelectedSignals(allSignalIndices);
+    } else if (selectedSignals.includes(signalIndex)) {
       setSelectedSignals((prevState) =>
         prevState.filter((filteredSignal) => filteredSignal !== signalIndex)
       );
