@@ -16,6 +16,8 @@ import { Button, styled as muiStyled } from "@mui/material";
 import styled from "styled-components";
 import { ChartContext } from "../../contexts/ChartContext";
 import api from "../../api/api";
+import InfoIcon from "@mui/icons-material/Info";
+import { InfoModal } from "../modals/InfoModal";
 
 interface Props {
   edf: any;
@@ -44,6 +46,7 @@ export const Chart = ({ edf }: Props) => {
   const microVoltUnit = edf?.getSignalPhysicalUnit(0); // same for all signals
   const samplingFrequency = edf?.getSignalSamplingFrequency(0); // same for all signals
   const [highlightedIndices, setHighlightedIndices] = useState(new Set());
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
   console.log(highlightedIndices);
 
   useEffect(() => {
@@ -236,27 +239,45 @@ export const Chart = ({ edf }: Props) => {
     }
   };
 
+  const handleInfoClick = () => {
+    setInfoModalOpen(true);
+  };
+
   return (
     <>
       <Container>
+        <TopRightContainer>
+          <button
+            style={{ border: "none", background: "none" }}
+            onClick={handleInfoClick}
+          >
+            <InfoIcon />
+          </button>
+        </TopRightContainer>
         <Line options={options} data={data} ref={chartRef} />
       </Container>
-      <ResetButton onClick={handleResetZoom} variant="contained">
+      <ResetButton onClick={handleResetZoom} variant="outlined">
         Reset zoom
       </ResetButton>
-      <Button variant="outlined" onClick={findPeaks}>
+      <Button variant="outlined" onClick={findPeaks} style={{ marginLeft: 16 }}>
         Find peaks
       </Button>
+      <InfoModal open={infoModalOpen} setInfoModalOpen={setInfoModalOpen} />
     </>
   );
 };
 
-const ResetButton = muiStyled(Button)({
-  backgroundColor: "red",
-});
+const ResetButton = muiStyled(Button)({});
 
 const Container = styled.div`
   position: relative;
   height: 75vh;
   width: 95vw;
+`;
+
+const TopRightContainer = styled.div`
+  position: fixed;
+  top: 300px;
+  right: 0;
+  padding: 16px;
 `;
