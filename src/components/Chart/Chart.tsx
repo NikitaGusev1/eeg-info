@@ -101,7 +101,7 @@ export const Chart = ({ edf }: Props) => {
       maintainAspectRatio: false,
       datasets: {
         line: {
-          pointRadius: 1,
+          pointRadius: 0,
           cubicInterpolationMode: "monotone" as const,
           lineTension: 0.1,
           borderJoinStyle: "round" as const,
