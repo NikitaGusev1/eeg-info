@@ -60,11 +60,10 @@ export const Chart = ({ edf }: Props) => {
         chartCanvas.removeEventListener("click", handleAltClick);
       }
     };
-  }, [chartRef, highlightedIndices]);
+  }, [chartRef]);
 
   const handleAltClick = (event) => {
     if (event.altKey && chartRef.current) {
-      console.log("clicked");
       const activePoints = chartRef.current.getElementsAtEventForMode(
         event.nativeEvent,
         "nearest",
@@ -76,22 +75,20 @@ export const Chart = ({ edf }: Props) => {
         const firstPoint = activePoints[0];
         const datasetIndex = firstPoint.datasetIndex;
         const index = firstPoint.index;
-
-        // Create a unique identifier for the point across all datasets
         const pointId = `${datasetIndex}-${index}`;
 
-        if (highlightedIndices.has(pointId)) {
-          highlightedIndices.delete(pointId);
-        } else {
-          highlightedIndices.add(pointId);
-        }
-
-        setHighlightedIndices(new Set(highlightedIndices));
-        chartRef.current.update();
+        setHighlightedIndices((prevIndices) => {
+          const newIndices = new Set(prevIndices);
+          if (newIndices.has(pointId)) {
+            newIndices.delete(pointId);
+          } else {
+            newIndices.add(pointId);
+          }
+          return newIndices;
+        });
       }
     }
   };
-
   const handleResetZoom = () => {
     if (chartRef && chartRef.current) {
       chartRef.current.resetZoom();
