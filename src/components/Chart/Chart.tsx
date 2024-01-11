@@ -72,21 +72,18 @@ export const Chart = ({ edf }: Props) => {
       );
 
       if (activePoints.length > 0) {
-        const firstPoint = activePoints[0];
-        const datasetIndex = firstPoint.datasetIndex;
-        const index = firstPoint.index;
+        const { datasetIndex, index } = activePoints[0];
+        // Create a unique identifier for the point
         const pointId = `${datasetIndex}-${index}`;
 
-        setHighlightedIndices((prevIndices) => {
-          console.log(prevIndices);
-
-          const newIndices = new Set(prevIndices);
+        setHighlightedIndices((prev) => {
+          const newIndices = new Set(prev);
           if (newIndices.has(pointId)) {
             newIndices.delete(pointId);
           } else {
             newIndices.add(pointId);
           }
-          return new Set(newIndices);
+          return newIndices;
         });
       }
     }
@@ -108,6 +105,10 @@ export const Chart = ({ edf }: Props) => {
           cubicInterpolationMode: "monotone" as const,
           lineTension: 0.1,
           borderJoinStyle: "round" as const,
+        },
+        pointBackgroundColor: (context) => {
+          const pointId = `${context.datasetIndex}-${context.dataIndex}`;
+          return highlightedIndices.has(pointId) && "red";
         },
       },
       events: ["click"],
