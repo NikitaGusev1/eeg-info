@@ -74,6 +74,9 @@ export const SelectSignalsModal = ({ edf }: Props) => {
             Cancel
           </CancelButton>
         </Row>
+        {selectedSignals.length > 10 && (
+          <p>Selecting more than 10 signals may impact performance.</p>
+        )}
       </DialogContent>
     </Dialog>
   );

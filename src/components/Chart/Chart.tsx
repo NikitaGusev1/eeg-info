@@ -1,4 +1,4 @@
-import { useContext, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -30,7 +30,6 @@ ChartJS.register(
   Tooltip,
   Legend,
   zoomPlugin,
-  // TODO: look into colors, currently they are too similar
   autocolors
 );
 
@@ -44,6 +43,51 @@ export const Chart = ({ edf }: Props) => {
   const numberOfRecords = edf?.getNumberOfRecords();
   const microVoltUnit = edf?.getSignalPhysicalUnit(0); // same for all signals
   const samplingFrequency = edf?.getSignalSamplingFrequency(0); // same for all signals
+  const [highlightedIndices, setHighlightedIndices] = useState(new Set());
+  console.log(highlightedIndices);
+
+  useEffect(() => {
+    const chartCanvas = chartRef.current?.chartInstance?.canvas;
+    if (chartCanvas) {
+      chartCanvas.addEventListener("click", handleAltClick);
+    }
+
+    return () => {
+      if (chartCanvas) {
+        chartCanvas.removeEventListener("click", handleAltClick);
+      }
+    };
+  }, [chartRef, highlightedIndices]);
+
+  const handleAltClick = (event) => {
+    if (event.altKey && chartRef.current) {
+      console.log("clicked");
+      const activePoints = chartRef.current.getElementsAtEventForMode(
+        event.nativeEvent,
+        "nearest",
+        { intersect: true },
+        false
+      );
+
+      if (activePoints.length > 0) {
+        const firstPoint = activePoints[0];
+        const datasetIndex = firstPoint.datasetIndex;
+        const index = firstPoint.index;
+
+        // Create a unique identifier for the point across all datasets
+        const pointId = `${datasetIndex}-${index}`;
+
+        if (highlightedIndices.has(pointId)) {
+          highlightedIndices.delete(pointId);
+        } else {
+          highlightedIndices.add(pointId);
+        }
+
+        setHighlightedIndices(new Set(highlightedIndices));
+        chartRef.current.update();
+      }
+    }
+  };
 
   const handleResetZoom = () => {
     if (chartRef && chartRef.current) {
@@ -63,7 +107,7 @@ export const Chart = ({ edf }: Props) => {
           borderJoinStyle: "round" as const,
         },
       },
-      events: [],
+      events: ["click"],
       animation: false,
       scales: {
         x: {
