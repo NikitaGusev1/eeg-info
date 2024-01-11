@@ -78,17 +78,20 @@ export const Chart = ({ edf }: Props) => {
         const pointId = `${datasetIndex}-${index}`;
 
         setHighlightedIndices((prevIndices) => {
+          console.log(prevIndices);
+
           const newIndices = new Set(prevIndices);
           if (newIndices.has(pointId)) {
             newIndices.delete(pointId);
           } else {
             newIndices.add(pointId);
           }
-          return newIndices;
+          return new Set(newIndices);
         });
       }
     }
   };
+
   const handleResetZoom = () => {
     if (chartRef && chartRef.current) {
       chartRef.current.resetZoom();
@@ -101,7 +104,7 @@ export const Chart = ({ edf }: Props) => {
       maintainAspectRatio: false,
       datasets: {
         line: {
-          pointRadius: 0,
+          pointRadius: 1,
           cubicInterpolationMode: "monotone" as const,
           lineTension: 0.1,
           borderJoinStyle: "round" as const,
