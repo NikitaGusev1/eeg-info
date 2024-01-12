@@ -15,6 +15,7 @@ import { useContext, useState } from "react";
 import styled from "styled-components";
 import { baseUrl } from "../../utils";
 import { UserContext } from "../../contexts/UserContext";
+import api from "../../api/api";
 
 export const LoginModal = () => {
   const [password, setPassword] = useState("");
@@ -27,6 +28,8 @@ export const LoginModal = () => {
     email,
     isLoggedIn,
     setIsLoggedIn,
+    setAssignedFiles,
+    setIsAdmin,
   } = useContext(UserContext);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -50,6 +53,22 @@ export const LoginModal = () => {
     );
   };
 
+  const tryFetchingUserData = async () => {
+    if (!!localStorage.getItem("token")) {
+      const response = await api.get(`${baseUrl}/user`);
+      if (response.status === 200) {
+        setIsLoggedIn(true);
+
+        const userData = response.data;
+        setEmail(userData.email);
+        setFirstName(userData.firstName);
+        setLastName(userData.lastName);
+        setIsAdmin(userData.isAdmin);
+        setAssignedFiles(userData.assignedFiles);
+      }
+    }
+  };
+
   const handleLogin = async () => {
     // const passwordValid = isPasswordValid();
     // if (passwordValid) {
@@ -68,9 +87,10 @@ export const LoginModal = () => {
         const data = await response.json();
         const token = data.token;
         localStorage.setItem("token", token);
-        setFirstName(data.firstName);
-        setLastName(data.lastName);
-        setIsLoggedIn(true);
+        tryFetchingUserData();
+        // setFirstName(data.firstName);
+        // setLastName(data.lastName);
+        // setIsLoggedIn(true);
       }
       if (response.status === 401) {
         setErrorMessage("Wrong email or password");
@@ -78,6 +98,7 @@ export const LoginModal = () => {
     } catch (error) {
       console.log(error);
     }
+
     // } else {
     //   setErrorMessage(
     //     "Password has to be minimum 8 characters and include one uppercase letter, one number and one special character"

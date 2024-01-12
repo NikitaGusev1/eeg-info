@@ -13,6 +13,7 @@ import { AssignFileModal } from "../modals/AssignFileModal";
 import { AddUserModal } from "../modals/AddUserModal";
 import ShareIcon from "@mui/icons-material/Share";
 import { ShareModal } from "../modals/ShareModal";
+import { SharedFilesModal } from "../modals/SharedFilesModal";
 
 export const HomeScreen = () => {
   const {
@@ -33,10 +34,12 @@ export const HomeScreen = () => {
     setIsLoggedIn,
     setIsAdmin,
     isAdmin,
+    setAssignedFiles,
   } = useContext(UserContext);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSharedFilesModalOpen, setIsSharedFilesModalOpen] = useState(false);
 
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
@@ -53,13 +56,14 @@ export const HomeScreen = () => {
         setFirstName(userData.firstName);
         setLastName(userData.lastName);
         setIsAdmin(userData.isAdmin);
+        setAssignedFiles(userData.assignedFiles);
       }
     }
   };
 
   useEffect(() => {
     tryFetchingUserData();
-  }, [tryFetchingUserData]);
+  }, []);
 
   const handleChangeFile = useCallback(
     async (event: any) => {
@@ -104,6 +108,10 @@ export const HomeScreen = () => {
     setIsShareModalOpen(false);
   };
 
+  const handleCloseSharedFilesModal = () => {
+    setIsSharedFilesModalOpen(false);
+  };
+
   return (
     <div className="App" style={{ padding: 16 }}>
       {!isLoggedIn ? (
@@ -112,6 +120,12 @@ export const HomeScreen = () => {
         <>
           <TopRightContainer>
             <UserName>{`Logged in as ${firstName} ${lastName}`}</UserName>
+            <Button
+              onClick={() => setIsSharedFilesModalOpen(true)}
+              variant="outlined"
+            >
+              My Shared Files
+            </Button>
             {isAdmin && (
               <Dashboard
                 setIsAssignModalOpen={setIsAssignModalOpen}
@@ -152,6 +166,10 @@ export const HomeScreen = () => {
           <ShareModal
             open={isShareModalOpen}
             handleCloseShareModal={handleCloseShareModal}
+          />
+          <SharedFilesModal
+            open={isSharedFilesModalOpen}
+            handleCloseSharedFilesModal={handleCloseSharedFilesModal}
           />
           {isChartReady && <Chart edf={edf} />}
         </>

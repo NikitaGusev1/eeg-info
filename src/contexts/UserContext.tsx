@@ -10,11 +10,13 @@ export const UserContext = createContext({
   lastName: null,
   isLoggedIn: false,
   isAdmin: false,
+  assignedFiles: null,
   setFirstName: (name: string) => {},
   setLastName: (name: string) => {},
   setEmail: (email: string) => {},
   setIsAdmin: (isAdmin: boolean) => {},
   setIsLoggedIn: (loggedIn: boolean) => {},
+  setAssignedFiles: (assignedFiles: string[]) => {},
 });
 
 export const UserContextProvider = ({ children }: Props) => {
@@ -23,6 +25,7 @@ export const UserContextProvider = ({ children }: Props) => {
   const [email, setEmail] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [assignedFiles, setAssignedFiles] = useState(false);
 
   const value = useMemo(() => {
     return {
@@ -36,6 +39,8 @@ export const UserContextProvider = ({ children }: Props) => {
       lastName,
       setIsAdmin,
       setIsLoggedIn,
+      assignedFiles,
+      setAssignedFiles,
     };
   }, [
     email,
@@ -48,6 +53,8 @@ export const UserContextProvider = ({ children }: Props) => {
     setLastName,
     setIsLoggedIn,
     setIsAdmin,
+    assignedFiles,
+    setAssignedFiles,
   ]);
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
