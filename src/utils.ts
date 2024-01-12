@@ -37,28 +37,38 @@ export const formatTime = (seconds: number) => {
 
 export const baseUrl = "http://localhost:3001";
 
-export function convertFilesToBase64(files, callback) {
-  if (files && files.length > 0) {
-    const base64Strings: string[] = [];
-    let filesProcessed = 0;
+export const convertFileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
 
-    const handleFileRead = (event) => {
-      const base64String = event.target?.result?.split(",")[1];
-      base64Strings.push(base64String);
+export function convertBase64ToFiles(base64Strings, filenames, callback) {
+  if (base64Strings && base64Strings.length > 0) {
+    const files = [];
+    let base64StringsProcessed = 0;
 
-      filesProcessed++;
-      if (filesProcessed === files.length) {
-        callback(base64Strings);
+    base64Strings.forEach((base64, index) => {
+      // Decode base64 to a Blob
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
-    };
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray]);
 
-    const readFile = (file) => {
-      const reader = new FileReader();
-      reader.onload = handleFileRead;
-      reader.readAsDataURL(file);
-    };
+      // Create a File from Blob
+      const file = new File([blob], filenames[index]);
+      files.push(file);
 
-    // Read each file
-    files.forEach((file) => readFile(file));
+      base64StringsProcessed++;
+      if (base64StringsProcessed === base64Strings.length) {
+        callback(files);
+      }
+    });
   }
 }

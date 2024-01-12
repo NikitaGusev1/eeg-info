@@ -11,6 +11,8 @@ import { Button } from "@mui/material";
 import Dashboard from "../Dashboard/Dashboard";
 import { AssignFileModal } from "../modals/AssignFileModal";
 import { AddUserModal } from "../modals/AddUserModal";
+import ShareIcon from "@mui/icons-material/Share";
+import { ShareModal } from "../modals/ShareModal";
 
 export const HomeScreen = () => {
   const {
@@ -34,6 +36,7 @@ export const HomeScreen = () => {
   } = useContext(UserContext);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // getPhysicalSignalConcatRecords(index, recordStart, howMany)
   // console.log(edf?.getPhysicalSignalConcatRecords(0, 0, 50));
@@ -97,6 +100,10 @@ export const HomeScreen = () => {
     setIsAddUserModalOpen(false);
   };
 
+  const handleCloseShareModal = () => {
+    setIsShareModalOpen(false);
+  };
+
   return (
     <div className="App" style={{ padding: 16 }}>
       {!isLoggedIn ? (
@@ -115,9 +122,24 @@ export const HomeScreen = () => {
               Logout
             </Button>
           </TopRightContainer>
-          <form>
+          {/* <form>
             <input type="file" onChange={handleOpenSelector} accept=".edf" />
-          </form>
+          </form> */}
+          <Button variant="contained" component="label">
+            Choose File
+            <input
+              type="file"
+              onChange={handleOpenSelector}
+              hidden
+              accept=".edf"
+            />
+          </Button>
+          <button
+            style={{ marginTop: 16, border: "none", background: "none" }}
+            onClick={() => setIsShareModalOpen(true)}
+          >
+            <ShareIcon />
+          </button>
           <SelectSignalsModal edf={edf} />
           <AssignFileModal
             open={isAssignModalOpen}
@@ -126,6 +148,10 @@ export const HomeScreen = () => {
           <AddUserModal
             open={isAddUserModalOpen}
             handleCloseAddUserModal={handleCloseAddUserModal}
+          />
+          <ShareModal
+            open={isShareModalOpen}
+            handleCloseShareModal={handleCloseShareModal}
           />
           {isChartReady && <Chart edf={edf} />}
         </>

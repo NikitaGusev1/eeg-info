@@ -17,12 +17,14 @@ import { AxiosResponse } from "axios";
 
 interface Props {
   open: boolean;
-  handleCloseAssignModal: () => void;
+  handleCloseShareModal: () => void;
 }
 
-export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
+export const ShareModal = ({ open, handleCloseShareModal }: Props) => {
   const [email, setEmail] = useState("");
   const [fileString, setFileString] = useState<string>("");
+  //   console.log(fileString);
+
   const [fileName, setFileName] = useState<string>("");
 
   const handleFilesChange = useCallback(
@@ -45,7 +47,7 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
     const response = await api.post(`${baseUrl}/assignFiles`, {
       email,
       file: fileString,
-      filename: fileName,
+      fileName,
       mimeType: "application/edf",
     });
     handleNotify(response);
@@ -54,12 +56,12 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
   const handleCancel = () => {
     setFileString("");
     setFileName("");
-    handleCloseAssignModal();
+    handleCloseShareModal();
   };
 
   const handleNotify = (response: AxiosResponse<any, any>) => {
     if (response.status === 200) {
-      toast("Successfully assigned!", {
+      toast("Successfully shared!", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -80,7 +82,7 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
     <>
       <Dialog open={open}>
         <DialogContent>
-          <DialogTitle>Assign Files</DialogTitle>
+          <DialogTitle>Share File</DialogTitle>
           <Column>
             <FormControl sx={{ m: 1, width: "25ch" }} variant="outlined">
               <InputLabel>Email</InputLabel>
@@ -92,8 +94,8 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
           </Column>
           <Column>
             <Button variant="contained" component="label">
-              Choose Files
-              <input type="file" onChange={handleFilesChange} multiple hidden />
+              Choose File
+              <input type="file" onChange={handleFilesChange} hidden />
             </Button>
             {/* {fileStrings.length > 0 && (
               <p>
@@ -115,7 +117,7 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
               onClick={handleAssign}
               disabled={!email || !fileString}
             >
-              Assign
+              Share
             </Button>
             <Button variant="outlined" onClick={handleCancel}>
               Cancel
