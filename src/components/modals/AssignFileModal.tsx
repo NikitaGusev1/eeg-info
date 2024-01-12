@@ -45,12 +45,11 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
     const response = await api.post(`${baseUrl}/assignFiles`, {
       email,
       file: fileString,
-      filename: fileName,
+      fileName,
       mimeType: "application/edf",
     });
     handleNotify(response);
   };
-
   const handleCancel = () => {
     setFileString("");
     setFileName("");

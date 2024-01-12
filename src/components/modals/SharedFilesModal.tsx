@@ -48,22 +48,27 @@ export const SharedFilesModal = ({
     <Dialog open={open}>
       <DialogContent>
         <DialogTitle>Shared Files</DialogTitle>
-        {assignedFiles?.map((fileName) => (
-          <button
-            key={fileName}
-            style={{ border: "none", background: "none" }}
-            onClick={() => handleDownload(fileName)}
-          >
-            <DialogContentText>{fileName}</DialogContentText>
-          </button>
-        ))}
+
+        <ul style={{ listStyleType: "none" }}>
+          {assignedFiles?.map((fileName) => (
+            <li>
+              <button
+                key={fileName}
+                style={{ border: "none", background: "none" }}
+                onClick={() => handleDownload(fileName)}
+              >
+                <DialogContentText>{fileName}</DialogContentText>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <Button
+          variant="outlined"
+          onClick={() => handleCloseSharedFilesModal(false)}
+        >
+          Close
+        </Button>
       </DialogContent>
-      <Button
-        variant="outlined"
-        onClick={() => handleCloseSharedFilesModal(false)}
-      >
-        Close
-      </Button>
     </Dialog>
   );
 };
