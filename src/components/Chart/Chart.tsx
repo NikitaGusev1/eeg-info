@@ -116,6 +116,7 @@ export const Chart = ({ edf }: Props) => {
       scales: {
         x: {
           type: "linear",
+          min: 50,
           ticks: {
             callback: function (value: number) {
               return value + "s";
@@ -123,6 +124,7 @@ export const Chart = ({ edf }: Props) => {
           },
         },
         y: {
+          // min: 500,
           ticks: {
             callback: function (value: number) {
               return `${value} ${microVoltUnit}`;
@@ -174,6 +176,10 @@ export const Chart = ({ edf }: Props) => {
         },
         zoom: {
           zoom: {
+            limits: {
+              y: { min: 50, max: 100 },
+              x: { min: 50, max: 100 },
+            },
             wheel: {
               enabled: true,
             },
