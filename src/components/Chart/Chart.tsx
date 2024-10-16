@@ -211,18 +211,29 @@ export const Chart = ({ edf }: Props) => {
     return data;
   }, [edf, durationOneSample]);
 
+  const downsampleData = (data, factor) => {
+    return data.filter((_, index) => index % factor === 0);
+  };
+
   const data = useMemo(() => {
-    const datasets = selectedSignals.map((signalIndex) => ({
-      label: edf?.getSignalLabel(signalIndex),
-      data: edf?.getPhysicalSignalConcatRecords(
+    const datasets = selectedSignals.map((signalIndex) => {
+      const signalData = edf?.getPhysicalSignalConcatRecords(
         signalIndex,
         0,
         numberOfRecords
-      ),
-    }));
+      );
+      const downsampledData = downsampleData(signalData, 10); // Adjust factor as needed
+
+      return {
+        label: edf?.getSignalLabel(signalIndex),
+        data: downsampledData,
+      };
+    });
+
+    const downsampledLabels = downsampleData(xLabels, 10); // Adjust factor as needed
 
     return {
-      labels: xLabels,
+      labels: downsampledLabels,
       datasets,
     };
   }, [selectedSignals, edf, numberOfRecords, xLabels]);
