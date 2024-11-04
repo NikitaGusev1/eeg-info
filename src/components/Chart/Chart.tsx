@@ -211,20 +211,20 @@ export const Chart = ({ edf }: Props) => {
     };
   }, []);
 
-  const xLabels = useMemo(() => {
-    const data = [];
-    const length = edf?.getPhysicalSignalConcatRecords(
-      0,
-      0,
-      numberOfRecords
-    ).length;
+  // const xLabels = useMemo(() => {
+  //   const data = [];
+  //   const length = edf?.getPhysicalSignalConcatRecords(
+  //     0,
+  //     0,
+  //     numberOfRecords
+  //   ).length;
 
-    for (let i = 0; i < length; i++) {
-      const fractions = i / durationOneSample; // 1/Xth second interval
-      data.push(fractions);
-    }
-    return data;
-  }, [edf, durationOneSample]);
+  //   for (let i = 0; i < length; i++) {
+  //     const fractions = i / durationOneSample; // 1/Xth second interval
+  //     data.push(fractions);
+  //   }
+  //   return data;
+  // }, [edf, durationOneSample]);
 
   const data = useMemo(() => {
     const signalDatasets = selectedSignals.map((signalIndex) => {
