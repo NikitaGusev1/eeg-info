@@ -119,10 +119,15 @@ export const Chart = ({ edf }: Props) => {
       scales: {
         x: {
           type: "linear",
-          min: 50,
+          // min: 50,
           ticks: {
             callback: function (value: number) {
-              return value + "s";
+              const totalSeconds = Math.floor(value);
+              const minutes = Math.floor(totalSeconds / 60); // Calculate minutes
+              const seconds = totalSeconds % 60; // Calculate remaining seconds
+
+              // Format as MM:SS
+              return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
             },
           },
         },
