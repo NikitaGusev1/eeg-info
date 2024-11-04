@@ -9,6 +9,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Decimation,
 } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
 import autocolors from "chartjs-plugin-autocolors";
@@ -28,6 +29,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  Decimation,
   Title,
   Tooltip,
   Legend,
@@ -98,6 +100,7 @@ export const Chart = ({ edf }: Props) => {
   const options = useMemo(() => {
     return {
       responsive: true,
+      parsing: false,
       maintainAspectRatio: false,
       datasets: {
         line: {
@@ -171,6 +174,10 @@ export const Chart = ({ edf }: Props) => {
             };
           },
         },
+        decimation: {
+          enabled: true,
+          algorithm: "min-max",
+        },
         tooltip: {
           events: [],
         },
@@ -212,20 +219,44 @@ export const Chart = ({ edf }: Props) => {
   }, [edf, durationOneSample]);
 
   const data = useMemo(() => {
-    const datasets = selectedSignals.map((signalIndex) => ({
-      label: edf?.getSignalLabel(signalIndex),
-      data: edf?.getPhysicalSignalConcatRecords(
+    const signalDatasets = selectedSignals.map((signalIndex) => {
+      // Fetch the signal data for the specified signal index
+      const signalData = edf.getPhysicalSignalConcatRecords(
         signalIndex,
         0,
         numberOfRecords
-      ),
-    }));
+      );
 
-    return {
-      labels: xLabels,
-      datasets,
-    };
-  }, [selectedSignals, edf, numberOfRecords, xLabels]);
+      // Convert Float32Array to a standard array for compatibility
+      const signalArray = Array.from(signalData);
+      const length = signalArray.length; // Get the length of the signal data
+
+      // Check if there's any data to process
+      if (length === 0) {
+        console.warn(`No data found for signal ${signalIndex}.`);
+        return {
+          label: edf.getSignalLabel(signalIndex) || `Signal ${signalIndex}`,
+          data: [], // Return empty data if no signal data
+        };
+      }
+
+      // Generate x (fractions) and y (signal values)
+      const points = signalArray.map((y, i) => {
+        const fractions = i / durationOneSample; // Calculate fraction for x-axis
+        return {
+          x: fractions, // Use calculated fraction for x
+          y: y, // Signal value for y
+        };
+      });
+
+      return {
+        label: edf.getSignalLabel(signalIndex) || `Signal ${signalIndex}`,
+        data: points,
+      };
+    });
+
+    return { datasets: signalDatasets };
+  }, [selectedSignals, edf, numberOfRecords, durationOneSample]);
 
   const findPeaks = async () => {
     try {
