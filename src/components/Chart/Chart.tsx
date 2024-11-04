@@ -119,7 +119,7 @@ export const Chart = ({ edf }: Props) => {
       scales: {
         x: {
           type: "linear",
-          min: 0,
+          // min: 1000,
           ticks: {
             callback: function (value: number) {
               const totalSeconds = Math.floor(value);
@@ -198,7 +198,7 @@ export const Chart = ({ edf }: Props) => {
             wheel: {
               enabled: true,
             },
-            mode: "xy",
+            mode: "x",
           },
           pan: {
             enabled: true,
