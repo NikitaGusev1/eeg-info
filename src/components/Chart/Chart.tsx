@@ -51,6 +51,54 @@ export const Chart = ({ edf }: Props) => {
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   console.log(highlightedIndices);
 
+  // Data state
+  const [currentData, setCurrentData] = useState([]);
+
+  useEffect(() => {
+    loadInitialData();
+  }, [edf, selectedSignals]);
+
+  // Load initial data and set it to the chart
+  const loadInitialData = () => {
+    const initialPointCount = Math.floor(numberOfRecords * 0.03); // 3% of records
+    const datasets = createDataset(selectedSignals, 0, initialPointCount);
+    setCurrentData(datasets);
+  };
+
+  // Create dataset function
+  const createDataset = (signals, start, end) => {
+    return signals.map((signalIndex) => {
+      const signalData = edf.getPhysicalSignalConcatRecords(
+        signalIndex,
+        0,
+        numberOfRecords
+      );
+      const signalArray = Array.from(signalData);
+
+      const points = signalArray.slice(start, end).map((y, i) => ({
+        x: (start + i) / durationOneSample,
+        y,
+      }));
+
+      return {
+        label: edf.getSignalLabel(signalIndex) || `Signal ${signalIndex}`,
+        data: points,
+      };
+    });
+  };
+
+  const handlePan = (chart) => {
+    const { min, max } = chart.scales.x;
+    const visibleCount = Math.floor(numberOfRecords * 0.1); // 10% of records
+    const startIndex = Math.floor(min * durationOneSample);
+    const endIndex = startIndex + visibleCount;
+
+    if (startIndex >= 0 && endIndex <= numberOfRecords) {
+      const newData = createDataset(selectedSignals, startIndex, endIndex);
+      setCurrentData(newData);
+    }
+  };
+
   useEffect(() => {
     const chartCanvas = chartRef.current?.chartInstance?.canvas;
     if (chartCanvas) {
@@ -204,6 +252,9 @@ export const Chart = ({ edf }: Props) => {
             enabled: true,
             mode: "xy",
             modifierKey: "shift",
+            onPan: ({ chart }) => {
+              handlePan(chart);
+            },
           },
         },
       },
@@ -297,7 +348,11 @@ export const Chart = ({ edf }: Props) => {
             <InfoIcon />
           </button>
         </TopRightContainer>
-        <Line options={options} data={data} ref={chartRef} />
+        <Line
+          options={options}
+          data={{ datasets: currentData }}
+          ref={chartRef}
+        />
       </Container>
       <ResetButton onClick={handleResetZoom} variant="outlined">
         Reset zoom
