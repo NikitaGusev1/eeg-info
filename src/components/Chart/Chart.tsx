@@ -119,7 +119,7 @@ export const Chart = ({ edf }: Props) => {
       scales: {
         x: {
           type: "linear",
-          // min: 50,
+          min: 0,
           ticks: {
             callback: function (value: number) {
               const totalSeconds = Math.floor(value);
@@ -191,6 +191,9 @@ export const Chart = ({ edf }: Props) => {
             limits: {
               y: { min: 50, max: 100 },
               x: { min: 50, max: 100 },
+            },
+            animation: {
+              duration: 0,
             },
             wheel: {
               enabled: true,
