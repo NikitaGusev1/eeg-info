@@ -220,7 +220,6 @@ export const Chart = ({ edf }: Props) => {
 
   const data = useMemo(() => {
     const signalDatasets = selectedSignals.map((signalIndex) => {
-      // Fetch the signal data for the specified signal index
       const signalData = edf.getPhysicalSignalConcatRecords(
         signalIndex,
         0,
@@ -229,23 +228,21 @@ export const Chart = ({ edf }: Props) => {
 
       // Convert Float32Array to a standard array for compatibility
       const signalArray = Array.from(signalData);
-      const length = signalArray.length; // Get the length of the signal data
+      const length = signalArray.length;
 
-      // Check if there's any data to process
       if (length === 0) {
         console.warn(`No data found for signal ${signalIndex}.`);
         return {
           label: edf.getSignalLabel(signalIndex) || `Signal ${signalIndex}`,
-          data: [], // Return empty data if no signal data
+          data: [],
         };
       }
 
-      // Generate x (fractions) and y (signal values)
       const points = signalArray.map((y, i) => {
-        const fractions = i / durationOneSample; // Calculate fraction for x-axis
+        const fractions = i / durationOneSample;
         return {
-          x: fractions, // Use calculated fraction for x
-          y: y, // Signal value for y
+          x: fractions,
+          y,
         };
       });
 
