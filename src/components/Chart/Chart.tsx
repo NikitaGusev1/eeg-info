@@ -43,40 +43,58 @@ export const Chart = ({ edf }: Props) => {
 
   const numberOfSamples = edf?.getSignalNumberOfSamplesPerRecord(0); // those will be the same for every signal
   const recordDuration = edf?.getRecordDuration();
-  const durationOneSample = numberOfSamples / recordDuration;
+  const durationOneSample = recordDuration / numberOfSamples;
+
   const numberOfRecords = edf?.getNumberOfRecords();
   const microVoltUnit = edf?.getSignalPhysicalUnit(0); // same for all signals
   const samplingFrequency = edf?.getSignalSamplingFrequency(0); // same for all signals
   const [highlightedIndices, setHighlightedIndices] = useState(new Set());
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  console.log(highlightedIndices);
 
   // Data state
   const [currentData, setCurrentData] = useState([]);
 
+  // Load initial data when signals or EDF data change
   useEffect(() => {
     loadInitialData();
   }, [edf, selectedSignals]);
 
   // Load initial data and set it to the chart
   const loadInitialData = () => {
-    const initialPointCount = Math.floor(numberOfRecords * 0.03); // 3% of records
+    if (!edf || !selectedSignals.length) return;
+
+    const initialPointCount = Math.floor(getSignalLength() * 0.1); // 10% of signal data
     const datasets = createDataset(selectedSignals, 0, initialPointCount);
     setCurrentData(datasets);
   };
 
-  // Create dataset function
-  const createDataset = (signals, start, end) => {
-    return signals.map((signalIndex) => {
-      const signalData = edf.getPhysicalSignalConcatRecords(
-        signalIndex,
-        0,
-        numberOfRecords
-      );
-      const signalArray = Array.from(signalData);
+  // Utility to get the length of the first selected signal
+  const getSignalLength = () => {
+    if (!selectedSignals.length) return 0;
+    const signalIndex = selectedSignals[0];
+    const signalData = edf.getPhysicalSignalConcatRecords(signalIndex, 0);
+    return Array.from(signalData).length;
+  };
 
-      const points = signalArray.slice(start, end).map((y, i) => ({
-        x: (start + i) / durationOneSample,
+  const signalArrays = useMemo(() => {
+    return selectedSignals.map((signalIndex) => {
+      const signalData = edf.getPhysicalSignalConcatRecords(signalIndex, 0);
+      return Array.from(signalData); // Convert to an array
+    });
+  }, [edf, selectedSignals]);
+
+  const createDataset = (signals, start, end) => {
+    return signals.map((signalIndex, idx) => {
+      const signalArray = signalArrays[idx]; // Use precomputed array
+
+      const samplesPerRecord = signalArray.length / edf.getNumberOfRecords();
+      const durationOneSample = edf.getRecordDuration() / samplesPerRecord;
+
+      const startIndex = Math.max(0, start);
+      const endIndex = Math.min(end, signalArray.length);
+
+      const points = signalArray.slice(startIndex, endIndex).map((y, i) => ({
+        x: (start + i) * durationOneSample, // Time in seconds
         y,
       }));
 
@@ -89,16 +107,20 @@ export const Chart = ({ edf }: Props) => {
 
   const handlePan = (chart) => {
     const { min, max } = chart.scales.x;
-    const visibleCount = Math.floor(numberOfRecords * 0.1); // 10% of records
-    const startIndex = Math.floor(min * durationOneSample);
-    const endIndex = startIndex + visibleCount;
 
-    if (startIndex >= 0 && endIndex <= numberOfRecords) {
+    // Convert time range (min, max in seconds) to sample indices
+    const samplesPerRecord = signalArrays[0].length / edf.getNumberOfRecords(); // Assume all signals have the same length
+    const durationOneSample = edf.getRecordDuration() / samplesPerRecord;
+
+    const startIndex = Math.floor(min / durationOneSample);
+    const endIndex = Math.floor(max / durationOneSample);
+
+    if (startIndex >= 0 && endIndex <= signalArrays[0].length) {
       const newData = createDataset(selectedSignals, startIndex, endIndex);
       setCurrentData(newData);
     }
   };
-
+  // Add and remove event listener for chart interaction
   useEffect(() => {
     const chartCanvas = chartRef.current?.chartInstance?.canvas;
     if (chartCanvas) {
@@ -170,12 +192,9 @@ export const Chart = ({ edf }: Props) => {
           // min: 1000,
           ticks: {
             callback: function (value: number) {
-              const totalSeconds = Math.floor(value);
-              const minutes = Math.floor(totalSeconds / 60); // Calculate minutes
-              const seconds = totalSeconds % 60; // Calculate remaining seconds
-
-              // Format as MM:SS
-              return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+              const minutes = Math.floor(value / 60); // Convert seconds to minutes
+              const seconds = Math.floor(value % 60); // Get remaining seconds
+              return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`; // Format as MM:SS
             },
           },
         },
@@ -237,8 +256,8 @@ export const Chart = ({ edf }: Props) => {
         zoom: {
           zoom: {
             limits: {
-              y: { min: 50, max: 100 },
-              x: { min: 50, max: 100 },
+              // y: { min: 50, max: 100 },
+              x: { min: 0, max: 100 },
             },
             animation: {
               duration: 0,
@@ -250,7 +269,7 @@ export const Chart = ({ edf }: Props) => {
           },
           pan: {
             enabled: true,
-            mode: "xy",
+            mode: "x",
             modifierKey: "shift",
             onPan: ({ chart }) => {
               handlePan(chart);
