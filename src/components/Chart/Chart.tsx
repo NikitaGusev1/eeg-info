@@ -48,7 +48,9 @@ export const Chart = ({ edf }: Props) => {
   const numberOfRecords = edf?.getNumberOfRecords();
   const microVoltUnit = edf?.getSignalPhysicalUnit(0); // same for all signals
   const samplingFrequency = edf?.getSignalSamplingFrequency(0); // same for all signals
-  const [highlightedIndices, setHighlightedIndices] = useState(new Set());
+  const [highlightedPoints, setHighlightedPoints] = useState(new Set());
+  console.log(highlightedPoints);
+
   const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   // Data state
@@ -120,46 +122,6 @@ export const Chart = ({ edf }: Props) => {
       setCurrentData(newData);
     }
   };
-  // Add and remove event listener for chart interaction
-  useEffect(() => {
-    const chartCanvas = chartRef.current?.chartInstance?.canvas;
-    if (chartCanvas) {
-      chartCanvas.addEventListener("click", handleAltClick);
-    }
-
-    return () => {
-      if (chartCanvas) {
-        chartCanvas.removeEventListener("click", handleAltClick);
-      }
-    };
-  }, [chartRef]);
-
-  const handleAltClick = (event) => {
-    if (event.altKey && chartRef.current) {
-      const activePoints = chartRef.current.getElementsAtEventForMode(
-        event.nativeEvent,
-        "nearest",
-        { intersect: true },
-        false
-      );
-
-      if (activePoints.length > 0) {
-        const { datasetIndex, index } = activePoints[0];
-        // Create a unique identifier for the point
-        const pointId = `${datasetIndex}-${index}`;
-
-        setHighlightedIndices((prev) => {
-          const newIndices = new Set(prev);
-          if (newIndices.has(pointId)) {
-            newIndices.delete(pointId);
-          } else {
-            newIndices.add(pointId);
-          }
-          return newIndices;
-        });
-      }
-    }
-  };
 
   const handleResetZoom = () => {
     if (chartRef && chartRef.current) {
@@ -172,16 +134,66 @@ export const Chart = ({ edf }: Props) => {
       responsive: true,
       parsing: false,
       maintainAspectRatio: false,
+      interaction: {
+        mode: "nearest",
+        intersect: true,
+      },
+      onClick: (event, activeElements) => {
+        if (activeElements.length === 0) return;
+
+        if (event.native.altKey && event.native.button === 0) {
+          const datasetIndex = activeElements[0].datasetIndex;
+          console.log(datasetIndex);
+
+          const index = activeElements[0].index;
+
+          // setHighlightedPoints((prev) => {
+          //   const newSet = new Set(prev);
+          //   const range = 3;
+          //   const start = Math.max(0, index - range);
+          //   const end = Math.min(
+          //     chartRef.current.data.datasets[datasetIndex].data.length - 1,
+          //     index + range
+          //   );
+
+          //   for (let i = start; i <= end; i++) {
+          //     newSet.add(`${datasetIndex}-${i}`);
+          //   }
+
+          //   return newSet;
+          // });
+          setHighlightedPoints((prev) => {
+            const newSet = new Set(prev);
+            const pointKey = `${datasetIndex}-${index}`;
+
+            if (newSet.has(pointKey)) {
+              // If point is already highlighted, remove it (toggle off)
+              newSet.delete(pointKey);
+            } else {
+              // If point is not highlighted, add it (toggle on)
+              newSet.add(pointKey);
+            }
+
+            return newSet;
+          });
+
+          chartRef.current.update();
+        }
+      },
       datasets: {
         line: {
-          pointRadius: 0,
+          pointRadius: (context) => {
+            const pointKey = `${context.datasetIndex}-${context.dataIndex}`;
+            return highlightedPoints.has(pointKey) ? 11 : 0;
+          },
           cubicInterpolationMode: "monotone" as const,
           lineTension: 0.1,
           borderJoinStyle: "round" as const,
+          pointHitRadius: 5,
         },
         pointBackgroundColor: (context) => {
-          const pointId = `${context.datasetIndex}-${context.dataIndex}`;
-          return highlightedIndices.has(pointId) && "red";
+          const pointKey = `${context.datasetIndex}-${context.dataIndex}`;
+          return highlightedPoints.has(pointKey) ? "red" : "blue";
         },
       },
       events: ["click"],
@@ -279,7 +291,7 @@ export const Chart = ({ edf }: Props) => {
       },
       spanGaps: true,
     };
-  }, []);
+  }, [highlightedPoints]);
 
   // const xLabels = useMemo(() => {
   //   const data = [];
