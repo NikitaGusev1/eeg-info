@@ -86,9 +86,9 @@ export const Chart = ({ edf }: Props) => {
     });
   }, [edf, selectedSignals]);
 
-  const createDataset = (signals, start, end) => {
-    return signals.map((signalIndex, idx) => {
-      const signalArray = signalArrays[idx]; // Use precomputed array
+  const createDataset = (signals: any[], start: number, end: number) => {
+    return signals.map((signalIndex: any, idx: string | number) => {
+      const signalArray = signalArrays[idx]; // precomputed array
 
       const samplesPerRecord = signalArray.length / edf.getNumberOfRecords();
       const durationOneSample = edf.getRecordDuration() / samplesPerRecord;
@@ -96,10 +96,16 @@ export const Chart = ({ edf }: Props) => {
       const startIndex = Math.max(0, start);
       const endIndex = Math.min(end, signalArray.length);
 
-      const points = signalArray.slice(startIndex, endIndex).map((y, i) => ({
-        x: (start + i) * durationOneSample, // Time in seconds
-        y,
-      }));
+      const points = signalArray.slice(startIndex, endIndex).map((y, i) => {
+        // The global index is simply 'startIndex + i'
+        const globalIdx = startIndex + i;
+
+        return {
+          x: globalIdx * durationOneSample,
+          y,
+          globalIndex: globalIdx, // <--- Store it here
+        };
+      });
 
       return {
         label: edf.getSignalLabel(signalIndex) || `Signal ${signalIndex}`,
@@ -141,43 +147,41 @@ export const Chart = ({ edf }: Props) => {
       },
       onClick: (event, activeElements) => {
         if (activeElements.length === 0) return;
-
         if (event.native.altKey && event.native.button === 0) {
-          const datasetIndex = activeElements[0].datasetIndex;
-          console.log(datasetIndex);
+          const chart = chartRef.current;
 
-          const index = activeElements[0].index;
+          const datasetIndex = activeElements[0].datasetIndex;
+          const dataIndex = activeElements[0].index;
+          const point = chart.data.datasets[datasetIndex].data[dataIndex];
+          const globalIndex = point.globalIndex;
+          const pointKey = `${datasetIndex}-${globalIndex}`;
           setHighlightedPoints((prev) => {
             const newSet = new Set(prev);
-            const pointKey = `${datasetIndex}-${index}`;
-
-            if (newSet.has(pointKey)) {
-              // If point is already highlighted, remove it (toggle off)
-              newSet.delete(pointKey);
-            } else {
-              // If point is not highlighted, add it (toggle on)
-              newSet.add(pointKey);
-            }
-
+            if (newSet.has(pointKey)) newSet.delete(pointKey);
+            else newSet.add(pointKey);
             return newSet;
           });
 
-          chartRef.current.update();
+          chart.update("none");
         }
       },
       datasets: {
         line: {
           pointRadius: (context) => {
-            const pointKey = `${context.datasetIndex}-${context.dataIndex}`;
+            const globalIndex = context.raw?.globalIndex;
+            const pointKey = `${context.datasetIndex}-${globalIndex}`;
+
             return highlightedPoints.has(pointKey) ? 11 : 0;
           },
           cubicInterpolationMode: "monotone" as const,
           lineTension: 0.1,
           borderJoinStyle: "round" as const,
-          pointHitRadius: 5,
+          pointHitRadius: 10,
         },
         pointBackgroundColor: (context) => {
-          const pointKey = `${context.datasetIndex}-${context.dataIndex}`;
+          const globalIndex = context.raw?.globalIndex;
+          const pointKey = `${context.datasetIndex}-${globalIndex}`;
+
           return highlightedPoints.has(pointKey) ? "red" : "blue";
         },
       },
@@ -186,7 +190,6 @@ export const Chart = ({ edf }: Props) => {
       scales: {
         x: {
           type: "linear",
-          // min: 1000,
           ticks: {
             callback: function (value: number) {
               const minutes = Math.floor(value / 60); // Convert seconds to minutes
@@ -252,10 +255,6 @@ export const Chart = ({ edf }: Props) => {
         },
         zoom: {
           zoom: {
-            limits: {
-              // y: { min: 50, max: 100 },
-              x: { min: 0, max: 100 },
-            },
             animation: {
               duration: 0,
             },
@@ -277,21 +276,6 @@ export const Chart = ({ edf }: Props) => {
       spanGaps: true,
     };
   }, [highlightedPoints]);
-
-  // const xLabels = useMemo(() => {
-  //   const data = [];
-  //   const length = edf?.getPhysicalSignalConcatRecords(
-  //     0,
-  //     0,
-  //     numberOfRecords
-  //   ).length;
-
-  //   for (let i = 0; i < length; i++) {
-  //     const fractions = i / durationOneSample; // 1/Xth second interval
-  //     data.push(fractions);
-  //   }
-  //   return data;
-  // }, [edf, durationOneSample]);
 
   const data = useMemo(() => {
     const signalDatasets = selectedSignals.map((signalIndex) => {
@@ -368,6 +352,7 @@ export const Chart = ({ edf }: Props) => {
           options={options}
           data={{ datasets: currentData }}
           ref={chartRef}
+          updateMode="none"
         />
       </Container>
       <ResetButton onClick={handleResetZoom} variant="outlined">
