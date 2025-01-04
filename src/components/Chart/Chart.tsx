@@ -1,4 +1,11 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -52,32 +59,57 @@ export const Chart = ({ edf }: Props) => {
   console.log(highlightedPoints);
 
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-
-  // Data state
+  const [xRange, setXRange] = useState({ min: 0, max: 100 });
   const [currentData, setCurrentData] = useState([]);
-  console.log(currentData);
 
-  // Load initial data when signals or EDF data change
   useEffect(() => {
     loadInitialData();
   }, [edf, selectedSignals]);
 
-  // Load initial data and set it to the chart
-  const loadInitialData = () => {
+  const getSignalLength = useCallback(() => {
+    if (!selectedSignals.length) return 0;
+    const signalIndex = selectedSignals[0];
+    const signalData = edf.getPhysicalSignalConcatRecords(signalIndex, 0);
+    return Array.from(signalData).length;
+  }, [selectedSignals]);
+
+  const createDataset = useCallback(
+    (signals: any[], start: number, end: number) => {
+      return signals.map((signalIndex: any, idx: string | number) => {
+        const signalArray = signalArrays[idx]; // precomputed array
+
+        const samplesPerRecord = signalArray.length / edf.getNumberOfRecords();
+        const durationOneSample = edf.getRecordDuration() / samplesPerRecord;
+
+        const startIndex = Math.max(0, start);
+        const endIndex = Math.min(end, signalArray.length);
+
+        const points = signalArray.slice(startIndex, endIndex).map((y, i) => {
+          const globalIdx = startIndex + i;
+
+          return {
+            x: globalIdx * durationOneSample,
+            y,
+            globalIndex: globalIdx,
+          };
+        });
+
+        return {
+          label: edf.getSignalLabel(signalIndex) || `Signal ${signalIndex}`,
+          data: points,
+        };
+      });
+    },
+    []
+  );
+
+  const loadInitialData = useCallback(() => {
     if (!edf || !selectedSignals.length) return;
 
     const initialPointCount = Math.floor(getSignalLength() * 0.1); // 10% of signal data
     const datasets = createDataset(selectedSignals, 0, initialPointCount);
     setCurrentData(datasets);
-  };
-
-  // Utility to get the length of the first selected signal
-  const getSignalLength = () => {
-    if (!selectedSignals.length) return 0;
-    const signalIndex = selectedSignals[0];
-    const signalData = edf.getPhysicalSignalConcatRecords(signalIndex, 0);
-    return Array.from(signalData).length;
-  };
+  }, [selectedSignals, getSignalLength, createDataset]);
 
   const signalArrays = useMemo(() => {
     return selectedSignals.map((signalIndex) => {
@@ -86,55 +118,55 @@ export const Chart = ({ edf }: Props) => {
     });
   }, [edf, selectedSignals]);
 
-  const createDataset = (signals: any[], start: number, end: number) => {
-    return signals.map((signalIndex: any, idx: string | number) => {
-      const signalArray = signalArrays[idx]; // precomputed array
+  const handlePan = useCallback(
+    (chart) => {
+      const { min, max } = chart.scales.x;
 
-      const samplesPerRecord = signalArray.length / edf.getNumberOfRecords();
+      // Convert time range (min, max in seconds) to sample indices
+      const samplesPerRecord =
+        signalArrays[0].length / edf.getNumberOfRecords(); // Assume all signals have the same length
       const durationOneSample = edf.getRecordDuration() / samplesPerRecord;
 
-      const startIndex = Math.max(0, start);
-      const endIndex = Math.min(end, signalArray.length);
+      const startIndex = Math.floor(min / durationOneSample);
+      const endIndex = Math.floor(max / durationOneSample);
 
-      const points = signalArray.slice(startIndex, endIndex).map((y, i) => {
-        // The global index is simply 'startIndex + i'
-        const globalIdx = startIndex + i;
+      if (startIndex >= 0 && endIndex <= signalArrays[0].length) {
+        const newData = createDataset(selectedSignals, startIndex, endIndex);
+        setCurrentData(newData);
+      }
+    },
+    [signalArrays, selectedSignals]
+  );
 
-        return {
-          x: globalIdx * durationOneSample,
-          y,
-          globalIndex: globalIdx, // <--- Store it here
-        };
-      });
-
-      return {
-        label: edf.getSignalLabel(signalIndex) || `Signal ${signalIndex}`,
-        data: points,
-      };
-    });
-  };
-
-  const handlePan = (chart) => {
-    const { min, max } = chart.scales.x;
-
-    // Convert time range (min, max in seconds) to sample indices
-    const samplesPerRecord = signalArrays[0].length / edf.getNumberOfRecords(); // Assume all signals have the same length
-    const durationOneSample = edf.getRecordDuration() / samplesPerRecord;
-
-    const startIndex = Math.floor(min / durationOneSample);
-    const endIndex = Math.floor(max / durationOneSample);
-
-    if (startIndex >= 0 && endIndex <= signalArrays[0].length) {
-      const newData = createDataset(selectedSignals, startIndex, endIndex);
-      setCurrentData(newData);
-    }
-  };
-
-  const handleResetZoom = () => {
+  const handleResetZoom = useCallback(() => {
     if (chartRef && chartRef.current) {
       chartRef.current.resetZoom();
     }
-  };
+  }, []);
+
+  const handleChartOnClick = useCallback(
+    (event, activeElements) => {
+      if (activeElements.length === 0) return;
+      if (event.native.altKey && event.native.button === 0) {
+        const chart = chartRef.current;
+
+        const datasetIndex = activeElements[0].datasetIndex;
+        const dataIndex = activeElements[0].index;
+        const point = chart.data.datasets[datasetIndex].data[dataIndex];
+        const globalIndex = point.globalIndex;
+        const pointKey = `${datasetIndex}-${globalIndex}`;
+        setHighlightedPoints((prev) => {
+          const newSet = new Set(prev);
+          if (newSet.has(pointKey)) newSet.delete(pointKey);
+          else newSet.add(pointKey);
+          return newSet;
+        });
+
+        chart.update("none");
+      }
+    },
+    [setHighlightedPoints]
+  );
 
   const options = useMemo(() => {
     return {
@@ -145,26 +177,7 @@ export const Chart = ({ edf }: Props) => {
         mode: "nearest",
         intersect: true,
       },
-      onClick: (event, activeElements) => {
-        if (activeElements.length === 0) return;
-        if (event.native.altKey && event.native.button === 0) {
-          const chart = chartRef.current;
-
-          const datasetIndex = activeElements[0].datasetIndex;
-          const dataIndex = activeElements[0].index;
-          const point = chart.data.datasets[datasetIndex].data[dataIndex];
-          const globalIndex = point.globalIndex;
-          const pointKey = `${datasetIndex}-${globalIndex}`;
-          setHighlightedPoints((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(pointKey)) newSet.delete(pointKey);
-            else newSet.add(pointKey);
-            return newSet;
-          });
-
-          chart.update("none");
-        }
-      },
+      onClick: handleChartOnClick,
       datasets: {
         line: {
           pointRadius: (context) => {
