@@ -50,10 +50,9 @@ export const SharedFilesModal = ({
         <DialogTitle>Shared Files</DialogTitle>
 
         <ul style={{ listStyleType: "none" }}>
-          {assignedFiles?.map((fileName) => (
-            <li>
+          {assignedFiles?.map((fileName, index) => (
+            <li key={`${fileName}+${index}`}>
               <button
-                key={fileName}
                 style={{ border: "none", background: "none" }}
                 onClick={() => handleDownload(fileName)}
               >
