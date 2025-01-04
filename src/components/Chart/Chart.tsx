@@ -55,6 +55,7 @@ export const Chart = ({ edf }: Props) => {
 
   // Data state
   const [currentData, setCurrentData] = useState([]);
+  console.log(currentData);
 
   // Load initial data when signals or EDF data change
   useEffect(() => {
@@ -146,22 +147,6 @@ export const Chart = ({ edf }: Props) => {
           console.log(datasetIndex);
 
           const index = activeElements[0].index;
-
-          // setHighlightedPoints((prev) => {
-          //   const newSet = new Set(prev);
-          //   const range = 3;
-          //   const start = Math.max(0, index - range);
-          //   const end = Math.min(
-          //     chartRef.current.data.datasets[datasetIndex].data.length - 1,
-          //     index + range
-          //   );
-
-          //   for (let i = start; i <= end; i++) {
-          //     newSet.add(`${datasetIndex}-${i}`);
-          //   }
-
-          //   return newSet;
-          // });
           setHighlightedPoints((prev) => {
             const newSet = new Set(prev);
             const pointKey = `${datasetIndex}-${index}`;
