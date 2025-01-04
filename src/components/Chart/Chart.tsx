@@ -59,7 +59,6 @@ export const Chart = ({ edf }: Props) => {
   console.log(highlightedPoints);
 
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [xRange, setXRange] = useState({ min: 0, max: 100 });
   const [currentData, setCurrentData] = useState([]);
 
   useEffect(() => {
@@ -106,7 +105,7 @@ export const Chart = ({ edf }: Props) => {
   const loadInitialData = useCallback(() => {
     if (!edf || !selectedSignals.length) return;
 
-    const initialPointCount = Math.floor(getSignalLength() * 0.1); // 10% of signal data
+    const initialPointCount = Math.floor(getSignalLength() * 0.03); // 3% of signal data
     const datasets = createDataset(selectedSignals, 0, initialPointCount);
     setCurrentData(datasets);
   }, [selectedSignals, getSignalLength, createDataset]);
@@ -271,6 +270,7 @@ export const Chart = ({ edf }: Props) => {
             animation: {
               duration: 0,
             },
+            speed: 1,
             wheel: {
               enabled: true,
             },
