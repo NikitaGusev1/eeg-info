@@ -47,7 +47,7 @@ export const SharedFilesModal = ({
   return (
     <Dialog open={open}>
       <DialogContent>
-        <DialogTitle>Shared Files</DialogTitle>
+        <DialogTitle>Assigned Files</DialogTitle>
 
         <ul style={{ listStyleType: "none" }}>
           {assignedFiles?.map((fileName, index) => (

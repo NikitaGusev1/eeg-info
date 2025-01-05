@@ -124,7 +124,7 @@ export const HomeScreen = () => {
               onClick={() => setIsSharedFilesModalOpen(true)}
               variant="outlined"
             >
-              My Shared Files
+              Assigned Files
             </Button>
             {isAdmin && (
               <Dashboard

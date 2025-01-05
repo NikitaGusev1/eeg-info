@@ -23,7 +23,6 @@ interface Props {
 export const ShareModal = ({ open, handleCloseShareModal }: Props) => {
   const [email, setEmail] = useState("");
   const [fileString, setFileString] = useState<string>("");
-  //   console.log(fileString);
 
   const [fileName, setFileName] = useState<string>("");
 
