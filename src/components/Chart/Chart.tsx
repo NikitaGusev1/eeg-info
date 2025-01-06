@@ -56,7 +56,6 @@ export const Chart = ({ edf }: Props) => {
   const microVoltUnit = edf?.getSignalPhysicalUnit(0); // same for all signals
   const samplingFrequency = edf?.getSignalSamplingFrequency(0); // same for all signals
   const [highlightedPoints, setHighlightedPoints] = useState(new Set());
-  console.log(highlightedPoints);
 
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [currentData, setCurrentData] = useState([]);

@@ -11,9 +11,8 @@ import { useCallback, useState } from "react";
 import styled from "styled-components";
 import { baseUrl, convertFileToBase64 } from "../../utils";
 import api from "../../api/api";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AxiosResponse } from "axios";
 
 interface Props {
   open: boolean;
@@ -42,37 +41,45 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
   );
 
   const handleAssign = async () => {
-    const response = await api.post(`${baseUrl}/assignFiles`, {
-      email,
-      file: fileString,
-      fileName,
-      mimeType: "application/edf",
-    });
-    handleNotify(response);
+    try {
+      const response = await api.post(`${baseUrl}/assignFiles`, {
+        email,
+        file: fileString,
+        fileName,
+        mimeType: "application/edf",
+      });
+
+      if (response.status === 200) {
+        handleNotify("success");
+      } else {
+        handleNotify("error");
+      }
+    } catch (error) {
+      handleNotify("error");
+    }
   };
+
+  const handleNotify = (type: "success" | "error") => {
+    const message =
+      type === "success" ? "Successfully assigned!" : "Something went wrong";
+
+    toast(message, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "dark",
+    });
+
+    handleCancel();
+  };
+
   const handleCancel = () => {
     setFileString("");
     setFileName("");
     handleCloseAssignModal();
-  };
-
-  const handleNotify = (response: AxiosResponse<any, any>) => {
-    if (response.status === 200) {
-      toast("Successfully assigned!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-    } else {
-      toast(`${response.data.message}`);
-    }
-
-    handleCancel();
   };
 
   return (
@@ -111,7 +118,9 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
           >
             <Button
               variant="outlined"
-              onClick={handleAssign}
+              onClick={() => {
+                handleAssign();
+              }}
               disabled={!email || !fileString}
             >
               Assign
@@ -122,7 +131,6 @@ export const AssignFileModal = ({ open, handleCloseAssignModal }: Props) => {
           </div>
         </DialogContent>
       </Dialog>
-      <ToastContainer />
     </>
   );
 };

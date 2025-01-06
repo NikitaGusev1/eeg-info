@@ -11,9 +11,8 @@ import { useCallback, useState } from "react";
 import styled from "styled-components";
 import { baseUrl, convertFileToBase64 } from "../../utils";
 import api from "../../api/api";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AxiosResponse } from "axios";
 
 interface Props {
   open: boolean;
@@ -49,7 +48,13 @@ export const ShareModal = ({ open, handleCloseShareModal }: Props) => {
       fileName,
       mimeType: "application/edf",
     });
-    handleNotify(response);
+    if (response.status === 200) {
+      handleNotify("success");
+    }
+
+    if (response.status === 500) {
+      handleNotify("error");
+    }
   };
 
   const handleCancel = () => {
@@ -58,20 +63,31 @@ export const ShareModal = ({ open, handleCloseShareModal }: Props) => {
     handleCloseShareModal();
   };
 
-  const handleNotify = (response: AxiosResponse<any, any>) => {
-    if (response.status === 200) {
+  const handleNotify = (message: string) => {
+    if (message === "success") {
       toast("Successfully shared!", {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: "dark",
       });
-    } else {
-      toast(`${response.data.message}`);
+    }
+
+    if (message === "error") {
+      toast("Successfully shared!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     }
 
     handleCancel();
@@ -124,7 +140,6 @@ export const ShareModal = ({ open, handleCloseShareModal }: Props) => {
           </div>
         </DialogContent>
       </Dialog>
-      <ToastContainer />
     </>
   );
 };
